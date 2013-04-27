@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 solid - a minimalist language with a tiny VM
 --------------------------------------------
 Solid is a very small, interpreted, object-oriented language.
@@ -14,4 +11,3 @@ It has some nice things (or bad things, depending on your perspective):
 Functional stuff is coming, don't worry! Expect lambdas, tail calls, and lots of higher-order functions. I say functional stuff and not Haskell stuff for a reason. Learn a Lisp and you'll know what I mean.
 
 Right now, only the VM is complete: feel free to check it out. The parser/compiler is under heavy development, and is only half implemented at the moment.
->>>>>>> 03b9732841f2a1f1748f02447eb518cf3f300874
