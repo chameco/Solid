@@ -1,4 +1,5 @@
 session.vim
+solid
 *.o
 parser.h
 parser.c
