@@ -20,7 +20,10 @@ solid_object *pop_stack(solid_vm *vm)
 		log_err("ERROR: Stack is empty");
 		exit(1);
 	} else {
-		return (solid_object *) n->data;
+		n->prev->next = n->next;
+		n->next->prev = n->prev;
+		solid_object *ret = (solid_object *) n->data;
+		return ret;
 	}
 }
 
@@ -111,6 +114,16 @@ solid_object *solid_gte(solid_object *a, solid_object *b)
 	return solid_bool(get_int_value(a) >= get_int_value(b));
 }
 
+solid_bytecode bc(solid_ins i, int a, int b, char *meta)
+{
+	solid_bytecode ret;
+	ret.ins = i;
+	ret.a = a;
+	ret.b = b;
+	ret.meta = meta;
+	return ret;
+}
+
 solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 {
 	if (func->type == T_FUNC) {
@@ -129,7 +142,7 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 					vm->regs[cur.a] = pop_stack(vm);
 					break;
 				case OP_GET:
-					vm->regs[cur.a] = get_namespace(vm->regs[cur.a], vm->regs[cur.b]);
+					vm->regs[cur.b] = get_namespace(vm->regs[cur.a], vm->regs[cur.b]);
 					break;
 				case OP_SET:
 					set_namespace(vm->regs[cur.a], solid_str(cur.meta), vm->regs[cur.b]);

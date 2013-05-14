@@ -78,6 +78,8 @@ solid_object *solid_gt(solid_object *a, solid_object *b);
 
 solid_object *solid_gte(solid_object *a, solid_object *b);
 
+solid_bytecode bc(solid_ins i, int a, int b, char *meta);
+
 solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func);
 
 solid_object *call_method(solid_vm *vm, solid_object *o, solid_object *method);

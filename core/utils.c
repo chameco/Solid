@@ -3,6 +3,10 @@
 hash_map *make_hash_map()
 {
 	hash_map *ret = (hash_map *) malloc(sizeof(hash_map));
+	int c;
+	for (c = 0; c < 256; c++) {
+		ret->buckets[c] = NULL;
+	}
 	return ret;
 }
 
@@ -20,6 +24,7 @@ int hash(char *key)
 void *get_hash(hash_map *m, char *key)
 {
 	list_node *cur = m->buckets[hash(key)];
+	if (cur == NULL) return NULL;
 	for (; cur->next != NULL; cur = cur->next) {
 		if (cur->data != NULL) {
 			if (strcmp(key, ((hash_val *) cur->data)->key) == 0) {

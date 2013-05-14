@@ -1,4 +1,4 @@
-OBJECTS = core/solid.o core/node.c core/vm.o core/object.o core/utils.o
+OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/utils.o
 CFLAGS = -I. -Icore -Wall -g
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)

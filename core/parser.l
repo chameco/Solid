@@ -13,11 +13,12 @@
 
 %%
 
-[ \t\r]                 {}
-"\n"                    {return TNEWLINE;}
+[ \t\n\r]                 {}
+[a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = identifier_node(yytext); return TIDENTIFIER;}
+L?\"(\\.|[^\\"])*\"     {yylval->node = const_string_node(yytext); return TSTRING;}
+[0-9]+                  {yylval->node = const_integer_node(atoi(yytext)); return TINTEGER;}
 "="                     {return TEQUAL;}
 "=="                    {return TCEQ;}
-"!="                    {return TCNE;}
 "<"                     {return TCLT;}
 "<="                    {return TCLE;}
 ">"                     {return TCGT;}
@@ -30,6 +31,7 @@
 "}"                     {return TRBRACE;}
 "."                     {return TDOT;}
 ","                     {return TCOMMA;}
+";"                     {return TSEMICOLON;}
 "+"                     {return TPLUS;}
 "-"                     {return TMINUS;}
 "*"                     {return TMUL;}
