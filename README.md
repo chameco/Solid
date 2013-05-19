@@ -1,4 +1,4 @@
-solid - a minimalist language with a tiny VM
+solid - a minimalist language with a tiny VM ![Build Status] (https://travis-ci.org/chameco/Solid.png)
 --------------------------------------------
 Solid is a very small, interpreted, object-oriented language.
 
