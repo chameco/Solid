@@ -45,8 +45,9 @@ int main(int argc, char *argv[])
 
 	solid_eval_bytecode(vm, testfunc);
 
-	debug("value: %d", get_int_value(get_namespace(vm->global_ns, solid_str("var"))));
-	debug("value: %d", get_int_value(get_namespace(vm->global_ns, solid_str("x"))));
+	debug("var: %d", get_int_value(get_namespace(vm->global_ns, solid_str("var"))));
+	debug("x: %d", get_int_value(get_namespace(vm->global_ns, solid_str("x"))));
+	debug("c: %d", get_int_value(get_namespace(vm->global_ns, solid_str("c"))));
 
 	return 0;
 }

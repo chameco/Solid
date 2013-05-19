@@ -47,6 +47,11 @@ ast_node *const_string_node(char *s)
 	return make_node(CONST_STR, NULL, NULL, str_value(s));
 }
 
+ast_node *const_bool_node(int i)
+{
+	return make_node(CONST_BOOL, NULL, NULL, int_value(i));
+}
+
 ast_node *identifier_node(char *name)
 {
 	return make_node(IDENTIFIER, NULL, NULL, str_value(name));

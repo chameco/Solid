@@ -13,7 +13,11 @@
 
 %%
 
-[ \t\n\r]                 {}
+[ \t\n\r]               {}
+"if"                    {return TIF;}
+"while"                 {return TWHILE;}
+"true"                  {return TTRUE;}
+"false"                 {return TFALSE;}
 [a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = identifier_node(yytext); return TIDENTIFIER;}
 L?\"(\\.|[^\\"])*\"     {yylval->node = const_string_node(yytext); return TSTRING;}
 [0-9]+                  {yylval->node = const_integer_node(atoi(yytext)); return TINTEGER;}

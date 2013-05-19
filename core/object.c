@@ -148,7 +148,7 @@ char *get_str_value(solid_object *o)
 
 int get_bool_value(solid_object *o)
 {
-	if (o->type == T_BOOL) {
+	if (o->type == T_BOOL || o->type == T_INT) {
 		return *((int *) o->data);
 	}
 	log_err("ERROR: Object not of boolean type");

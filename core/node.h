@@ -9,14 +9,18 @@
 
 typedef enum node_ins {
 	STATEMENT_LIST,
+	BLOCK,
 	IDENTIFIER,
 	NS_VAR,
 	GET_VAR,
 	SET_VAR,
 	CALL,
+	FUNC_ARGS,
 	CONST_INT,
 	CONST_STR,
-	FUNC_ARGS,
+	CONST_BOOL,
+	IF,
+	WHILE,
 	PLUS,
 	MINUS,
 	MUL,
@@ -53,6 +57,7 @@ ast_node *make_node(node_ins ins, ast_node *arg1, ast_node *arg2, node_val val);
 
 ast_node *const_integer_node(int i);
 ast_node *const_string_node(char *s);
+ast_node *const_bool_node(int i);
 ast_node *identifier_node(char *name);
 
 #endif

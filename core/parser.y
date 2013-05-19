@@ -14,10 +14,15 @@
 %parse-param {yyscan_t scanner}
 
 %token <node> TIDENTIFIER TSTRING TINTEGER
+%token <token> TTRUE TFALSE
+
+%token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TCEQ TCLT TCLE TCGT TCGE TEQUAL
+
 %token <token> TSEMICOLON;
 %token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT
-%token <token> TPLUS TMINUS TMUL TDIV
+
+%token <token> TIF TWHILE
 
 %type <node> program
 
@@ -55,10 +60,15 @@ expr : constant {$$ = $1;}
      | expr TCLE expr {$$ = make_node(CLTE, $1, $3, null_value());}
      | expr TCGT expr {$$ = make_node(CGT, $1, $3, null_value());}
      | expr TCGE expr {$$ = make_node(CGTE, $1, $3, null_value());}
+     | TLBRACE stmt_list TRBRACE {$$ = make_node(BLOCK, $2, NULL, null_value());}
+     | TIF expr expr {$$ = make_node(IF, $2, $3, null_value());}
+     | TWHILE expr expr {$$ = make_node(WHILE, $2, $3, null_value());}
      ;
 
 constant : TSTRING {$$ = $1;}
 	 | TINTEGER {$$ = $1;}
+	 | TTRUE {$$ = const_bool_node(1);}
+	 | TFALSE {$$ = const_bool_node(0);}
 	 ;
 
 identifier : TIDENTIFIER {$$ = $1;}

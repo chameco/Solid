@@ -11,12 +11,14 @@
 
 typedef enum solid_ins {
 	OP_END,
+	OP_NOP,
 	OP_PUSH,
 	OP_POP,
 	OP_GET,
 	OP_SET,
 	OP_PUSHINT,
 	OP_PUSHSTR,
+	OP_PUSHBOOL,
 	OP_GLOBALNS,
 	OP_DEF,
 	OP_CLASS,

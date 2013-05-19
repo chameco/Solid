@@ -14,6 +14,7 @@ solid_object *parse_tree(ast_node *tree)
 int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 {
 	//debug("node->ins: %d", node->ins);
+	int temp[8] = {0};
 	switch (node->ins) {
 		case STATEMENT_LIST:
 			if (node->arg2 != NULL) {
@@ -58,13 +59,36 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			break;
 		case CALL:
 			break;
+		case FUNC_ARGS:
+			break;
 		case CONST_INT:
 			dbc(OP_PUSHINT, node->val.ival, 0, NULL);
 			break;
 		case CONST_STR:
 			dbc(OP_PUSHSTR, 0, 0, node->val.strval);
 			break;
-		case FUNC_ARGS:
+		case CONST_BOOL:
+			dbc(OP_PUSHBOOL, node->val.ival, 0, NULL);
+			break;
+		case IF:
+			pn(node->arg1);
+			dbc(OP_POP, 2, 0, NULL);
+			dbc(OP_NOT, 2, 0, NULL);
+			temp[0] = i;
+			dbc(OP_NOP, 0, 0, NULL);
+			pn(node->arg2);
+			bcode[temp[0]] = bc(OP_JMPIF, i, 2, NULL);
+			break;
+		case WHILE:
+			temp[0] = i;
+			pn(node->arg1);
+			dbc(OP_POP, 2, 0, NULL);
+			dbc(OP_NOT, 2, 0, NULL);
+			temp[1] = i;
+			dbc(OP_NOP, 0, 0, NULL);
+			pn(node->arg2);
+			dbc(OP_JMP, temp[0] - 1, 0, NULL);
+			bcode[temp[1]] = bc(OP_JMPIF, temp[1], 2, NULL);
 			break;
 		case PLUS:
 			pn(node->arg1);

@@ -37,7 +37,7 @@ solid_object *define_function(solid_bytecode *inslist)
 solid_object *solid_add(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"+\" on invalid types");
 	}
 	return solid_int(get_int_value(a) + get_int_value(b));
 }
@@ -45,7 +45,7 @@ solid_object *solid_add(solid_object *a, solid_object *b)
 solid_object *solid_sub(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"-\" on invalid types");
 	}
 	return solid_int(get_int_value(a) - get_int_value(b));
 }
@@ -53,7 +53,7 @@ solid_object *solid_sub(solid_object *a, solid_object *b)
 solid_object *solid_mul(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"*\" on invalid types");
 	}
 	return solid_int(get_int_value(a) * get_int_value(b));
 }
@@ -61,7 +61,7 @@ solid_object *solid_mul(solid_object *a, solid_object *b)
 solid_object *solid_div(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"\\\" on invalid types");
 	}
 	return solid_int(get_int_value(a) / get_int_value(b));
 }
@@ -69,15 +69,15 @@ solid_object *solid_div(solid_object *a, solid_object *b)
 solid_object *solid_eq(solid_object *a,	solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"==\" on invalid types");
 	}
 	return solid_bool(get_int_value(a) == get_int_value(b));
 }
 
 solid_object *solid_not(solid_object *o)
 {
-	if (o->type != T_BOOL) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+	if (o->type != T_BOOL && o->type != T_INT) {
+		log_err("ERROR: Attempt to negate invalid type");
 	}
 	return solid_bool(!get_bool_value(o));
 }
@@ -85,7 +85,7 @@ solid_object *solid_not(solid_object *o)
 solid_object *solid_lt(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"<\" on invalid types");
 	}
 	return solid_bool(get_int_value(a) < get_int_value(b));
 }
@@ -93,7 +93,7 @@ solid_object *solid_lt(solid_object *a, solid_object *b)
 solid_object *solid_lte(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \"<=\" on invalid types");
 	}
 	return solid_bool(get_int_value(a) <= get_int_value(b));
 }
@@ -101,7 +101,7 @@ solid_object *solid_lte(solid_object *a, solid_object *b)
 solid_object *solid_gt(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \">\" on invalid types");
 	}
 	return solid_bool(get_int_value(a) > get_int_value(b));
 }
@@ -109,7 +109,7 @@ solid_object *solid_gt(solid_object *a, solid_object *b)
 solid_object *solid_gte(solid_object *a, solid_object *b)
 {
 	if (a->type != T_INT || b->type != T_INT) {
-		log_err("ERROR: Attempt to do apply operator on invalid types");
+		log_err("ERROR: Attempt to apply operator \">=\" on invalid types");
 	}
 	return solid_bool(get_int_value(a) >= get_int_value(b));
 }
@@ -132,6 +132,8 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 		int pos;
 		for (pos = 0, cur = inslist[pos]; cur.ins != OP_END; cur = inslist[++pos]) {
 			switch(cur.ins) {
+				case OP_NOP:
+					break;
 				case OP_END:
 					return vm->regs[0];
 					break;
@@ -153,6 +155,9 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 				case OP_PUSHSTR:
 					push_stack(vm, solid_str(cur.meta));
 					break;
+				case OP_PUSHBOOL:
+					push_stack(vm, solid_bool(cur.a));
+					break;
 				case OP_GLOBALNS:
 					vm->regs[cur.a] = vm->global_ns;
 					break;
@@ -161,11 +166,11 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 				case OP_CLASS:
 					break;
 				case OP_JMP:
-					pos += cur.a;
+					pos = cur.a;
 					break;
 				case OP_JMPIF:
 					if (get_bool_value(vm->regs[cur.b])) {
-						pos += cur.a;
+						pos = cur.a;
 					}
 					break;
 				case OP_CALL:
@@ -230,4 +235,3 @@ solid_object *call_method(solid_vm *vm, solid_object *o, solid_object *method)
 		}
 	}
 }
-
