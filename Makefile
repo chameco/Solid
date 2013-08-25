@@ -10,7 +10,7 @@ datarootdir = $(prefix)/share
 datadir = $(datarootdir)
 libdir = $(exec_prefix)/lib
 all : parser $(OBJECTS)
-	$(CC) parser.o lexer.o $(OBJECTS) -g -Wall -o solid
+	$(CC) parser.o lexer.o $(OBJECTS) -g -Wall -Werror -o solid
 parser: core/parser.y core/parser.l
 	bison -d core/parser.y
 	flex core/parser.l
@@ -18,7 +18,7 @@ parser: core/parser.y core/parser.l
 	$(CC) -c parser.c -o parser.o -g -Icore
 tarball:
 	mkdir solid-$(VERSION)
-	cp -r Makefile parser src include solid-$(VERSION)
+	cp -r Makefile parser core solid-$(VERSION)
 	tar -czf solid-$(VERSION).tar.gz solid-$(VERSION)
 install:
 	mkdir -p $(DESTDIR)$(bindir)

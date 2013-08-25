@@ -31,5 +31,6 @@ hash_map *make_hash_map();
 int hash(char *key);
 void *get_hash(hash_map *m, char *key);
 void set_hash(hash_map *m, char *key, void *val);
+hash_map *copy_hash(hash_map *m);
 
 #endif

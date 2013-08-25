@@ -17,7 +17,7 @@ typedef enum solid_type {
 	T_STR,
 	T_BOOL,
 	T_FUNC,
-	T_CLASS,
+	T_NODE,
 } solid_type;
 
 typedef struct solid_object {
@@ -29,15 +29,21 @@ typedef struct solid_object {
 void set_namespace(solid_object *ns, solid_object *name, solid_object *o);
 solid_object *get_namespace(solid_object *ns, solid_object *name);
 void initialize_builtin_classes(solid_object *global_ns);
+solid_object *get_builtin_class_object();
+solid_object *get_builtin_class_integer();
+solid_object *get_builtin_class_string();
+solid_object *get_builtin_class_boolean();
+solid_object *get_builtin_class_func();
 solid_object *make_object();
 solid_object *solid_instance();
 solid_object *solid_int(int val);
 solid_object *solid_str(char *val);
 solid_object *solid_bool(int val);
 solid_object *solid_func();
-solid_object *solid_class(solid_object *name, solid_object *super);
+solid_object *solid_class(solid_object *super);
 
 void delete_object(solid_object *o);
+solid_object *instance_from_class(solid_object *class);
 
 int get_int_value(solid_object *o);
 char *get_str_value(solid_object *o);

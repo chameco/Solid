@@ -43,8 +43,35 @@ void set_hash(hash_map *m, char *key, void *val)
 	int hk = hash(key);
 	if (m->buckets[hk] == NULL) {
 		m->buckets[hk] = make_list();
+	} else {
+		list_node *c;
+		for (c = m->buckets[hk]; c->next != NULL; c = c->next) {
+			if (c->data != NULL) {
+				if (strcmp(((hash_val *) c->data)->key, key) == 0) {
+					c->data = (void *) hv;
+					return;
+				}
+			}
+		}
 	}
 	insert_list(m->buckets[hk], (void *) hv);
+}
+
+hash_map *copy_hash(hash_map *m)
+{
+	hash_map *ret = make_hash_map();
+	int i;
+	for (i = 0; i < 256; i++) {
+		list_node *c = m->buckets[i];
+		if (c != NULL) {
+			for (; c->next != NULL; c = c->next) {
+				if (c->data != NULL) {
+					set_hash(ret, ((hash_val *) c->data)->key, ((hash_val *) c->data)->val);
+				}
+			}
+		}
+	}
+	return ret;
 }
 
 list_node *make_list_node(void *d)
