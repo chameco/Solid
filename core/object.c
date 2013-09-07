@@ -5,11 +5,13 @@ solid_object *SOLID_CLASS_INTEGER;
 solid_object *SOLID_CLASS_STRING;
 solid_object *SOLID_CLASS_BOOLEAN;
 solid_object *SOLID_CLASS_FUNC;
+solid_object *SOLID_CLASS_CFUNC;
 solid_object *SOLID_CLASS_NODE;
 
 void set_namespace(solid_object *ns, solid_object *name, solid_object *o)
 {
 	if (ns->type != T_INSTANCE) {
+		debug("ns->type: %d", ns->type);
 		log_err("Namespace is not an instance");
 		exit(1);
 	} else {
@@ -25,6 +27,7 @@ void set_namespace(solid_object *ns, solid_object *name, solid_object *o)
 solid_object *get_namespace(solid_object *ns, solid_object *name)
 {
 	if (ns->type != T_INSTANCE) {
+		debug("ns->type: %d", ns->type);
 		log_err("Namespace is not an instance");
 		exit(1);
 	} else {
@@ -35,6 +38,22 @@ solid_object *get_namespace(solid_object *ns, solid_object *name)
 			exit(1);
 		}
 		return ret;
+	}
+}
+
+int namespace_has(solid_object *ns, solid_object *name)
+{
+	if (ns->type != T_INSTANCE) {
+		debug("ns->type: %d", ns->type);
+		log_err("Namespace is not an instance");
+		exit(1);
+	} else {
+		hash_map *h = (hash_map *) ns->data;
+		solid_object *ret = get_hash(h, get_str_value(name));
+		if (ret == NULL) {
+			return 0;
+		}
+		return 1;
 	}
 }
 
@@ -59,6 +78,14 @@ void initialize_builtin_classes(solid_object *global_ns) //Checks allow us to in
 	SOLID_CLASS_FUNC = SOLID_CLASS_FUNC == NULL ? solid_class(SOLID_CLASS_OBJECT)
 		: SOLID_CLASS_FUNC;
 	set_namespace(global_ns, solid_str("Function"), SOLID_CLASS_FUNC);
+
+	SOLID_CLASS_FUNC = SOLID_CLASS_CFUNC == NULL ? solid_class(SOLID_CLASS_OBJECT)
+		: SOLID_CLASS_CFUNC;
+	set_namespace(global_ns, solid_str("CFunction"), SOLID_CLASS_CFUNC);
+
+	SOLID_CLASS_NODE = SOLID_CLASS_NODE == NULL ? solid_class(SOLID_CLASS_OBJECT)
+		: SOLID_CLASS_FUNC;
+	set_namespace(global_ns, solid_str("Node"), SOLID_CLASS_NODE);
 }
 
 solid_object *get_builtin_class_object()
@@ -84,6 +111,16 @@ solid_object *get_builtin_class_boolean()
 solid_object *get_builtin_class_func()
 {
 	return SOLID_CLASS_FUNC;
+}
+
+solid_object *get_builtin_class_cfunc()
+{
+	return SOLID_CLASS_CFUNC;
+}
+
+solid_object *get_builtin_class_node()
+{
+	return SOLID_CLASS_NODE;
 }
 
 solid_object *make_object()
@@ -141,6 +178,24 @@ solid_object *solid_func()
 	ret->class = SOLID_CLASS_FUNC;
 	ret->data = NULL;
 	return ret; //We don't do anything here: all bytecode will be added later
+}
+
+solid_object *solid_cfunc()
+{
+	solid_object *ret = make_object();
+	ret->type = T_CFUNC;
+	ret->class = SOLID_CLASS_CFUNC;
+	ret->data = NULL;
+	return ret;
+}
+
+solid_object *solid_node()
+{
+	solid_object *ret = make_object();
+	ret->type = T_NODE;
+	ret->class = SOLID_CLASS_NODE;
+	ret->data = NULL;
+	return ret;
 }
 
 solid_object *solid_class(solid_object *super)

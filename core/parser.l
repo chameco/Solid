@@ -27,10 +27,6 @@
 "new"                   {return TNEW;}
 "true"                  {return TTRUE;}
 "false"                 {return TFALSE;}
-[a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = identifier_node(yytext); return TIDENTIFIER;}
-L?\"(\\.|[^\\"])*\"     {yylval->node = const_string_node(yytext); return TSTRING;}
-[0-9]+                  {yylval->node = const_integer_node(atoi(yytext)); return TINTEGER;}
-"->"                    {return TARROW;}
 "=="                    {return TCEQ;}
 "<"                     {return TCLT;}
 "<="                    {return TCLE;}
@@ -40,8 +36,8 @@ L?\"(\\.|[^\\"])*\"     {yylval->node = const_string_node(yytext); return TSTRIN
 ")"                     {return TRPAREN;}
 "["                     {return TLSQUARE;}
 "]"                     {return TRSQUARE;}
-"{"                     {return TLBRACE;}
-"}"                     {return TRBRACE;}
+\{|do                   {return TLBRACE;}
+\}|end                  {return TRBRACE;}
 "."                     {return TDOT;}
 ","                     {return TCOMMA;}
 ";"                     {return TSEMICOLON;}
@@ -49,6 +45,9 @@ L?\"(\\.|[^\\"])*\"     {yylval->node = const_string_node(yytext); return TSTRIN
 "-"                     {return TMINUS;}
 "*"                     {return TMUL;}
 "/"                     {return TDIV;}
+[a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = identifier_node(yytext); return TIDENTIFIER;}
+\"([^\\\"]|\\.)*\"      {yytext[strlen(yytext) - 1] = '\0'; yylval->node = const_string_node(yytext+1); return TSTRING;}
+[0-9]+                  {yylval->node = const_integer_node(atoi(yytext)); return TINTEGER;}
 .                       {log_err("Unknown token"); yyterminate();}
 
 %%

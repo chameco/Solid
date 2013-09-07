@@ -16,9 +16,10 @@ typedef enum solid_ins {
 	OP_POP,
 	OP_GET,
 	OP_SET,
-	OP_PUSHINT,
-	OP_PUSHSTR,
-	OP_PUSHBOOL,
+	OP_STOREINT,
+	OP_STORESTR,
+	OP_STOREBOOL,
+	OP_MOV,
 	OP_GLOBALNS,
 	OP_LOCALNS,
 	OP_FN,
@@ -28,7 +29,6 @@ typedef enum solid_ins {
 	OP_JMP,
 	OP_JMPIF,
 	OP_CALL,
-	OP_RETURN,
 	OP_ADD,
 	OP_SUB,
 	OP_MUL,
@@ -50,14 +50,11 @@ typedef struct solid_bytecode {
 
 typedef struct solid_function {
 	solid_bytecode *bcode;
-	list_node *args;
 } solid_function;
 
 typedef struct solid_vm {
 	list_node *stack;
 	solid_object *regs[256];
-	int call_stack[256];
-	int call_stack_pointer;
 	solid_object *namespace_stack[256];
 	int namespace_stack_pointer;
 } solid_vm;
@@ -79,33 +76,22 @@ void pop_predefined_namespace(solid_vm *vm);
 solid_object *get_current_namespace(solid_vm *vm);
 
 solid_object *define_function(solid_bytecode *inslist);
-
+solid_object *define_c_function(void (*function)(solid_vm *vm));
 solid_object *define_class(solid_object *super);
 
 solid_object *solid_add(solid_object *a, solid_object *b);
-
 solid_object *solid_sub(solid_object *a, solid_object *b);
-
 solid_object *solid_mul(solid_object *a, solid_object *b);
-
 solid_object *solid_div(solid_object *a, solid_object *b);
-
 solid_object *solid_eq(solid_object *a, solid_object *b);
-
 solid_object *solid_not(solid_object *o);
-
 solid_object *solid_lt(solid_object *a, solid_object *b);
-
 solid_object *solid_lte(solid_object *a, solid_object *b);
-
 solid_object *solid_gt(solid_object *a, solid_object *b);
-
 solid_object *solid_gte(solid_object *a, solid_object *b);
 
 solid_bytecode bc(solid_ins i, int a, int b, void *meta);
 
-solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func);
-
-solid_object *call_method(solid_vm *vm, solid_object *o, solid_object *method);
+solid_object *solid_call_func(solid_vm *vm, solid_object *func);
 
 #endif

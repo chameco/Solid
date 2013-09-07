@@ -5,9 +5,6 @@ solid_vm *make_solid_vm()
 	solid_vm *ret = (solid_vm *) malloc(sizeof(solid_vm));
 	ret->stack = make_list();
 	memset(ret->regs, 0, 256);
-	memset(ret->call_stack, 0, 256);
-	ret->call_stack_pointer = 0;
-	ret->call_stack_pointer = 0;
 	memset(ret->namespace_stack, 0, 256);
 	ret->namespace_stack[0] = solid_instance();
 	ret->namespace_stack_pointer = 0;
@@ -17,6 +14,7 @@ solid_vm *make_solid_vm()
 
 void push_stack(solid_vm *vm, solid_object *o)
 {
+	//debug("pushed a %d", o->type);
 	insert_list(vm->stack, (void *) o);
 }
 
@@ -30,13 +28,14 @@ solid_object *pop_stack(solid_vm *vm)
 		n->prev->next = n->next;
 		n->next->prev = n->prev;
 		solid_object *ret = (solid_object *) n->data;
+		//debug("popped a %d", ret->type);
 		return ret;
 	}
 }
 
 void push_namespace(solid_vm *vm)
 {
-	vm->namespace_stack[++vm->namespace_stack_pointer] = solid_instance();
+	vm->namespace_stack[++vm->namespace_stack_pointer] = instance_from_class(vm->namespace_stack[0]);
 }
 
 void pop_namespace(solid_vm *vm)
@@ -65,6 +64,13 @@ solid_object *define_function(solid_bytecode *inslist)
 	solid_function *fval = (solid_function *) malloc(sizeof(solid_function));
 	fval->bcode = inslist;
 	ret->data = (void *) fval;
+	return ret;
+}
+
+solid_object *define_c_function(void (*function)(solid_vm *vm))
+{
+	solid_object *ret = solid_cfunc();
+	ret->data = (void *) function;
 	return ret;
 }
 
@@ -125,6 +131,7 @@ solid_object *solid_eq(solid_object *a,	solid_object *b)
 solid_object *solid_not(solid_object *o)
 {
 	if (o->type != T_BOOL && o->type != T_INT) {
+		debug("o->type: %d, strval: %s", o->type, get_str_value(o));
 		log_err("Attempt to negate invalid type");
 		exit(1);
 	}
@@ -177,7 +184,7 @@ solid_bytecode bc(solid_ins i, int a, int b, void *meta)
 	return ret;
 }
 
-solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
+solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 {
 	if (func->type == T_FUNC) {
 		solid_bytecode *inslist = ((solid_function *) func->data)->bcode;
@@ -185,56 +192,76 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 		int pos;
 		solid_object *temp;
 		for (pos = 0, cur = inslist[pos]; cur.ins != OP_END; cur = inslist[++pos]) {
+			//debug("ins: %d, stack height: %d", cur.ins, length_list(vm->stack));
 			switch(cur.ins) {
-				case OP_NOP:
-					break;
 				case OP_END:
 					return vm->regs[0];
+					break;
+				case OP_NOP:
 					break;
 				case OP_PUSH:
 					push_stack(vm, vm->regs[cur.a]);
 					break;
 				case OP_POP:
 					vm->regs[cur.a] = pop_stack(vm);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GET:
-					vm->regs[cur.b] = get_namespace(vm->regs[cur.a], vm->regs[cur.b]);
+					vm->regs[cur.a] = get_namespace(vm->regs[cur.b], vm->regs[cur.a]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_SET:
-					set_namespace(vm->regs[cur.a], solid_str((char *) cur.meta), vm->regs[cur.b]);
+					if (!namespace_has(vm->regs[cur.b], solid_str((char *) cur.meta))) {
+						set_namespace(vm->regs[cur.b], solid_str((char *) cur.meta), vm->regs[cur.a]);
+					} else {
+						log_err("Attempt to redefine variable %s", (char *) cur.meta);
+						exit(1);
+					}
 					break;
-				case OP_PUSHINT:
-					push_stack(vm, solid_int(cur.a));
+				case OP_STOREINT:
+					vm->regs[cur.a] = solid_int(cur.b);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
-				case OP_PUSHSTR:
-					push_stack(vm, solid_str((char *) cur.meta));
+				case OP_STORESTR:
+					vm->regs[cur.a] = solid_str((char *) cur.meta);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
-				case OP_PUSHBOOL:
-					push_stack(vm, solid_bool(cur.a));
+				case OP_STOREBOOL:
+					vm->regs[cur.a] = solid_bool(cur.b);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
+					break;
+				case OP_MOV:
+					vm->regs[cur.a] = vm->regs[cur.b];
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GLOBALNS:
 					vm->regs[cur.a] = vm->namespace_stack[0];
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_LOCALNS:
 					vm->regs[cur.a] = get_current_namespace(vm);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_FN:
-					push_stack(vm, define_function((solid_bytecode *) cur.meta));
+					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_CLASS:
-					if (vm->regs[cur.a]->type == T_INT) {
+					if (vm->regs[cur.b]->type == T_INT) {
 						temp = define_class(NULL);
 					} else {
-						temp = define_class(vm->regs[cur.a]);
+						temp = define_class(vm->regs[cur.b]);
 					}
-					push_stack(vm, temp);
+					vm->regs[cur.a] = temp;
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					push_predefined_namespace(vm, temp);
 					break;
 				case OP_ENDCLASS:
 					pop_predefined_namespace(vm);
 					break;
 				case OP_NEW:
-					push_stack(vm, instance_from_class(vm->regs[cur.a]));
+					vm->regs[cur.a] = instance_from_class(vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_JMP:
 					pos = cur.a;
@@ -246,60 +273,57 @@ solid_object *solid_eval_bytecode(solid_vm *vm, solid_object *func)
 					break;
 				case OP_CALL:
 					push_namespace(vm);
-					vm->call_stack[++(vm->call_stack_pointer)] = pos;
-					solid_eval_bytecode(vm, vm->regs[cur.a]);
+					solid_call_func(vm, vm->regs[cur.a]);
 					pop_namespace(vm);
-					break;
-				case OP_RETURN:
-					pos = vm->call_stack[vm->call_stack_pointer--];
 					break;
 				case OP_ADD:
 					vm->regs[cur.a] = solid_add(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_SUB:
 					vm->regs[cur.a] = solid_sub(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_MUL:
 					vm->regs[cur.a] = solid_mul(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_DIV:
 					vm->regs[cur.a] = solid_div(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_EQ:
 					vm->regs[cur.a] = solid_eq(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_NOT:
 					vm->regs[cur.a] = solid_not(vm->regs[cur.a]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_LT:
 					vm->regs[cur.a] = solid_lt(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_LTE:
 					vm->regs[cur.a] = solid_lte(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GT:
 					vm->regs[cur.a] = solid_gt(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GTE:
 					vm->regs[cur.a] = solid_gte(vm->regs[cur.a], vm->regs[cur.b]);
+					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 			}
 		}
+	} else if (func->type == T_CFUNC) {
+		((void (*)())(func->data))(vm);
 	} else {
+		debug("func->type: %d", func->type);
 		log_err("Object not a function");
 		exit(1);
 	}
 	return NULL;
-}
-
-solid_object *call_method(solid_vm *vm, solid_object *o, solid_object *method)
-{
-	if (o->type != T_INSTANCE) {
-		log_err("Attempt to call method on primitive");
-		exit(1);
-	} else {
-		hash_map *h = (hash_map *) o->data;
-		solid_object *m = (solid_object *) get_hash(h, get_str_value(method));
-		return solid_eval_bytecode(vm, m);
-	}
 }

@@ -125,3 +125,15 @@ void remove_list(list_node *l, void *data)
 		}
 	}
 }
+
+int length_list(list_node *l)
+{
+	int a = 0;
+	list_node *c;
+	for (c = l; c->next != NULL; c = c->next) {
+		if (c->data != NULL) {
+			a++;
+		}
+	}
+	return a;
+}

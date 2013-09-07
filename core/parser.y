@@ -17,7 +17,7 @@
 
 %token <token> TCEQ TCLT TCLE TCGT TCGE
 
-%token <token> TARROW TSEMICOLON;
+%token <token> TSEMICOLON;
 %token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT
 
 %token <token> TIF TWHILE TDEF TFN TRETURN TCLASS TNEW
@@ -49,7 +49,7 @@ ns_var : identifier {$$ = make_node(NS_VAR, $1, NULL, null_value());}
 expr : constant {$$ = $1;}
      | expr TLPAREN func_args TRPAREN {$$ = make_node(CALL, $1, $3, null_value());}
      | ns_var {$$ = make_node(GET, $1, NULL, null_value());}
-     | TDEF ns_var TARROW expr {$$ = make_node(DEFINE, $4, $2, null_value());}
+     | TDEF ns_var expr {$$ = make_node(DEFINE, $3, $2, null_value());}
      | TNEW expr {$$ = make_node(NEW, $2, NULL, null_value());}
      | expr TPLUS expr {$$ = make_node(PLUS, $1, $3, null_value());}
      | expr TMINUS expr {$$ = make_node(MINUS, $1, $3, null_value());}

@@ -17,6 +17,7 @@ list_node *make_list();
 int find_list(list_node *l, void *data);
 void insert_list(list_node *l, void *data);
 void remove_list(list_node *l, void *data);
+int length_list(list_node *l);
 
 typedef struct hash_val {
 	char *key;

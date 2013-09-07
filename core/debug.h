@@ -6,9 +6,17 @@
 #include <string.h>
 
 #ifdef NDEBUG
+
 #define debug(M, ...)
 #else 
 #define debug(M, ...) fprintf(stdout, "DEBUG %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__) 
+
+#ifndef REGISTER_DEBUG
+#define regdebug(M, ...)
+#else 
+#define regdebug(M, ...) fprintf(stdout, "REGDEBUG %s:%d: " M "\n", __FILE__, __LINE__, ##__VA_ARGS__) 
+#endif
+
 #endif
 
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))

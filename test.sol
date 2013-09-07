@@ -1,7 +1,9 @@
-def var ->
-	2 * 37;
-def test -> fn () {
-	25;
-};
-def x ->
-	test() + 10;
+print("1");
+
+def x 1;
+
+def f fn() do
+	x + 2;
+end;
+
+def y f();
