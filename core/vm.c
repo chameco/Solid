@@ -35,7 +35,8 @@ solid_object *pop_stack(solid_vm *vm)
 
 void push_namespace(solid_vm *vm)
 {
-	vm->namespace_stack[++vm->namespace_stack_pointer] = instance_from_class(vm->namespace_stack[0]);
+	vm->namespace_stack[vm->namespace_stack_pointer+1] = instance_from_class(vm->namespace_stack[vm->namespace_stack_pointer]);
+	vm->namespace_stack_pointer++;
 }
 
 void pop_namespace(solid_vm *vm)
@@ -58,11 +59,12 @@ solid_object *get_current_namespace(solid_vm *vm)
 	return vm->namespace_stack[vm->namespace_stack_pointer];
 }
 
-solid_object *define_function(solid_bytecode *inslist)
+solid_object *define_function(solid_bytecode *inslist, solid_object *closure)
 {
 	solid_object *ret = solid_func();
 	solid_function *fval = (solid_function *) malloc(sizeof(solid_function));
 	fval->bcode = inslist;
+	fval->closure = closure;
 	ret->data = (void *) fval;
 	return ret;
 }
@@ -187,6 +189,9 @@ solid_bytecode bc(solid_ins i, int a, int b, void *meta)
 solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 {
 	if (func->type == T_FUNC) {
+		if (((solid_function *) func->data)->closure != NULL) {
+			push_predefined_namespace(vm, ((solid_function *) func->data)->closure);
+		}
 		solid_bytecode *inslist = ((solid_function *) func->data)->bcode;
 		solid_bytecode cur;
 		int pos;
@@ -211,12 +216,7 @@ solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_SET:
-					if (!namespace_has(vm->regs[cur.b], solid_str((char *) cur.meta))) {
-						set_namespace(vm->regs[cur.b], solid_str((char *) cur.meta), vm->regs[cur.a]);
-					} else {
-						log_err("Attempt to redefine variable %s", (char *) cur.meta);
-						exit(1);
-					}
+					set_namespace(vm->regs[cur.b], solid_str((char *) cur.meta), vm->regs[cur.a]);
 					break;
 				case OP_STOREINT:
 					vm->regs[cur.a] = solid_int(cur.b);
@@ -243,7 +243,7 @@ solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_FN:
-					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta);
+					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta, get_current_namespace(vm));
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_CLASS:
@@ -272,9 +272,7 @@ solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 					}
 					break;
 				case OP_CALL:
-					push_namespace(vm);
 					solid_call_func(vm, vm->regs[cur.a]);
-					pop_namespace(vm);
 					break;
 				case OP_ADD:
 					vm->regs[cur.a] = solid_add(vm->regs[cur.a], vm->regs[cur.b]);
@@ -317,6 +315,9 @@ solid_object *solid_call_func(solid_vm *vm, solid_object *func)
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 			}
+		}
+		if (((solid_function *) func->data)->closure != NULL) {
+			pop_predefined_namespace(vm);
 		}
 	} else if (func->type == T_CFUNC) {
 		((void (*)())(func->data))(vm);

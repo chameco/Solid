@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef SOLID_COMMON_H
+#define SOLID_COMMON_H
 typedef void* yyscan_t;
 typedef struct YYLTYPE  
 {  

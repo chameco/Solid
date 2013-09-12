@@ -1,12 +1,11 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#ifndef SOLID_OBJECT_H
+#define SOLID_OBJECT_H
 
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "debug.h"
-
-#include "utils.h"
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
 
 struct solid_object;
 

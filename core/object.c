@@ -16,10 +16,6 @@ void set_namespace(solid_object *ns, solid_object *name, solid_object *o)
 		exit(1);
 	} else {
 		hash_map *h = (hash_map *) ns->data;
-		if (get_hash(h, get_str_value(name)) != NULL) {
-			log_err("Attempt to redefine variable \"%s\"", get_str_value(name));
-			exit(1);
-		}
 		set_hash(h, get_str_value(name), (void *) o);
 	}
 }

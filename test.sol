@@ -1,9 +1,13 @@
-print("1");
+attr = 20;
+foo = class () {
+	attr = 10;
+	meth = fn (x) { attr = attr + x; };
+};
 
-def x 1;
+meth = foo.meth;
+bar = new foo;
+meth2 = bar.meth;
 
-def f fn() do
-	x + 2;
-end;
-
-def y f();
+foo.attr = 200;
+x = foo.attr;
+y = bar.attr;

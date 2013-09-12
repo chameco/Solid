@@ -1,15 +1,4 @@
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdio.h>
-#include "debug.h"
-
-#include "node.h"
-#include "vm.h"
-#include "ast.h"
-#include "common.h"
-#include "lexer.h"
-
-solid_bytecode i[256];
+#include "solid.h"
 
 int yyparse(ast_node **expression, yyscan_t scanner);
 
@@ -66,19 +55,28 @@ void spit_function(char *path, solid_object *func)
 	}
 }
 
+void solid_repl()
+{
+	size_t n = 256;
+	char *buffer = (char *) malloc(sizeof(char) * n);
+	solid_vm *vm = make_solid_vm();
+	while (printf("%s", "solid> "), getline(&buffer, &n, stdin) != -1) {
+		solid_object *curexpr = parse_tree(parse_expr(buffer));
+		solid_call_func(vm, curexpr);
+		printf("%d\n", get_int_value(vm->regs[255]));
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	solid_object *testfunc = parse_tree(parse_file(argv[1]));
-
-	spit_function("test.list", testfunc);
-
-	solid_vm *vm = make_solid_vm();
-
-	set_namespace(get_current_namespace(vm), solid_str("print"), define_c_function(solid_print));
-
-	solid_call_func(vm, testfunc);
-
-	d_int(vm, "y");
+	if (argc > 1) {
+		solid_object *mainfunc = parse_tree(parse_file(argv[1]));
+		solid_vm *vm = make_solid_vm();
+		set_namespace(get_current_namespace(vm), solid_str("print"), define_c_function(solid_print));
+		solid_call_func(vm, mainfunc);
+	} else {
+		solid_repl();
+	}
 
 	return 0;
 }

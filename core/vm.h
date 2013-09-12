@@ -1,12 +1,12 @@
-#ifndef VM_H
-#define VM_H
+#ifndef SOLID_VM_H
+#define SOLID_VM_H
 
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "debug.h"
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
 
-#include "utils.h"
 #include "object.h"
 
 typedef enum solid_ins {
@@ -50,6 +50,7 @@ typedef struct solid_bytecode {
 
 typedef struct solid_function {
 	solid_bytecode *bcode;
+	solid_object *closure;
 } solid_function;
 
 typedef struct solid_vm {
@@ -75,7 +76,7 @@ void pop_predefined_namespace(solid_vm *vm);
 
 solid_object *get_current_namespace(solid_vm *vm);
 
-solid_object *define_function(solid_bytecode *inslist);
+solid_object *define_function(solid_bytecode *inslist, solid_object *closure);
 solid_object *define_c_function(void (*function)(solid_vm *vm));
 solid_object *define_class(solid_object *super);
 

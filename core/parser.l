@@ -20,13 +20,13 @@
 [ \t\n\r]               {}
 "if"                    {return TIF;}
 "while"                 {return TWHILE;}
-"def"                   {return TDEF;}
 "fn"                    {return TFN;}
 "return"                {return TRETURN;}
 "class"                 {return TCLASS;}
 "new"                   {return TNEW;}
 "true"                  {return TTRUE;}
 "false"                 {return TFALSE;}
+"="                     {return TEQUALS;}
 "=="                    {return TCEQ;}
 "<"                     {return TCLT;}
 "<="                    {return TCLE;}

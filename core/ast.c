@@ -11,7 +11,7 @@ solid_object *parse_tree(ast_node *tree)
 			sizeof(solid_bytecode) * 1024);
 	int i = parse_node(tree, bcode, 0);
 	dbc(OP_END, 0, 0, NULL);
-	return define_function(bcode);
+	return define_function(bcode, NULL);
 }
 int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 {
@@ -48,14 +48,16 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			dbc(OP_GET, 2, 1, NULL);
 			dbc(OP_MOV, 255, 2, NULL);
 			break;
-		case DEFINE:
+		case SET:
 			pn(node->arg1);
+			dbc(OP_PUSH, 255, 0, NULL);
 			if (node->arg2->arg2 != NULL) {
 				pn(node->arg2->arg2);
 				dbc(OP_MOV, 1, 255, NULL);
 			} else {
 				dbc(OP_LOCALNS, 1, 0, NULL);
 			}
+			dbc(OP_POP, 255, 0, NULL);
 			dbc(OP_SET, 255, 1, node->arg2->arg1->val.strval);
 			break;
 		case CALL:
@@ -134,6 +136,7 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			}
 			dbc(OP_CLASS, 0, 2, NULL);
 			pn(node->arg2);
+			dbc(OP_ENDCLASS, 0, 0, NULL);
 			dbc(OP_MOV, 255, 0, NULL);
 			break;
 		case NEW:

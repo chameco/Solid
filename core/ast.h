@@ -1,9 +1,10 @@
-#ifndef AST_H
-#define AST_H
+#ifndef SOLID_AST_H
+#define SOLID_AST_H
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include "debug.h"
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
 
 #include "utils.h"
 #include "node.h"
