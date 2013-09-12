@@ -63,7 +63,17 @@ void solid_repl()
 	while (printf("%s", "solid> "), getline(&buffer, &n, stdin) != -1) {
 		solid_object *curexpr = parse_tree(parse_expr(buffer));
 		solid_call_func(vm, curexpr);
-		printf("%d\n", get_int_value(vm->regs[255]));
+		if (vm->regs[255]->type == T_INT) {
+			printf("%d\n", get_int_value(vm->regs[255]));
+		} else if (vm->regs[255]->type == T_STR) {
+			printf("%s\n", get_str_value(vm->regs[255]));
+		} else if (vm->regs[255]->type == T_FUNC) {
+			printf("%s\n", "Function");
+		} else if (vm->regs[255]->type == T_INSTANCE) {
+			printf("%s\n", "Object");
+		} else {
+			printf("%s\n", "Unknown");
+		}
 	}
 }
 
