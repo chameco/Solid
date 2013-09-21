@@ -16,8 +16,8 @@ all : parser $(OBJECTS)
 parser: core/parser.y core/parser.l
 	bison -d core/parser.y
 	flex core/parser.l
-	$(CC) -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g -Icore
-	$(CC) -Wno-implicit-function-declaration -c parser.c -o parser.o -g -Icore
+	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g
+	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c parser.c -o parser.o -g
 tarball:
 	mkdir solid-$(VERSION)
 	cp -r Makefile parser core solid-$(VERSION)
