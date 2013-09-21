@@ -6,7 +6,6 @@
 #include <cuttle/utils.h>
 #include <cuttle/debug.h>
 
-#include "utils.h"
 #include "node.h"
 #include "vm.h"
 #include "object.h"
