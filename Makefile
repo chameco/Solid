@@ -1,6 +1,6 @@
 OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o
 CC = clang
-CFLAGS = -I. -Icore -Wall -g -fPIC
+CFLAGS = -I/usr/local/include -I. -Icore -Wall -g -fPIC
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
