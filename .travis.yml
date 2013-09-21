@@ -1,2 +1,2 @@
-install: make get-deps
+install: make deps
 script: make
