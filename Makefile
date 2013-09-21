@@ -11,7 +11,7 @@ datarootdir = $(prefix)/share
 datadir = $(datarootdir)
 libdir = $(exec_prefix)/lib
 includedir = $(prefix)/include
-all : parser $(OBJECTS)
+all : parser $(OBJECTS) deps
 	$(CC) parser.o lexer.o $(OBJECTS) -ldl -lcuttle -g -Wall -Werror -o solid
 parser: core/parser.y core/parser.l
 	bison -d core/parser.y
@@ -41,14 +41,15 @@ static: parser $(OBJECTS)
 	ar -cvq libsolid.a parser.o lexer.o $(OBJECTS)
 shared: parser $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libsolid.so.1.0 -o libsolid.so.1.0 parser.o lexer.o $(OBJECTS)
-lib: $(TARGET)
-	$(CC) -shared -Wl,-soname,$(LIBNAME).so -lsolid -o $(LIBNAME).so $(TARGET)
-get-deps:
+lib: lib/$(TARGET).o
+	$(CC) -shared -Wl,-soname,$(TARGET).so -lsolid -o $(TARGET).so lib/$(TARGET).o
+deps:
 	mkdir -p deps
 	cd deps; git clone http://github.com/chameco/Cuttle; cd Cuttle; make && sudo make install
 uninstall:
 	rm $(DESTDIR)$(bindir)/solid
 clean:
-	rm parser.c parser.h lexer.c lexer.h
-	rm $(OBJECTS)
-	rm lib/*.o
+	rm -f parser.c parser.h lexer.c lexer.h
+	rm -f parser.o lexer.o $(OBJECTS)
+	rm -f lib/*.o
+	rm -f deps -r
