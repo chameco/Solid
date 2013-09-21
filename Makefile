@@ -11,7 +11,7 @@ datarootdir = $(prefix)/share
 datadir = $(datarootdir)
 libdir = $(exec_prefix)/lib
 includedir = $(prefix)/include
-all : parser $(OBJECTS) deps
+all : deps parser $(OBJECTS)
 	$(CC) parser.o lexer.o $(OBJECTS) -ldl -lcuttle -g -Wall -Werror -o solid
 parser: core/parser.y core/parser.l
 	bison -d core/parser.y
