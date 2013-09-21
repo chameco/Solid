@@ -3,9 +3,12 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
+#include <dlfcn.h>
 #include <cuttle/utils.h>
 #include <cuttle/debug.h>
 
+#include "scanner_state.h"
 #include "node.h"
 #include "vm.h"
 #include "ast.h"

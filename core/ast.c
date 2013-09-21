@@ -83,6 +83,20 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 		case CONST_BOOL:
 			dbc(OP_STOREBOOL, 255, node->val.ival, NULL);
 			break;
+		case CONST_LIST:
+			dbc(OP_STORELIST, 0, 0, NULL);
+			pn(node->arg1);
+			break;
+		case LIST_BODY:
+			if (node->arg1 != NULL) {
+				pn(node->arg1);
+				dbc(OP_PUSHLIST, 0, 255, NULL);
+			}
+			if (node->arg2 != NULL) {
+				pn(node->arg2);
+			}
+			dbc(OP_MOV, 255, 0, NULL);
+			break;
 		case IF:
 			pn(node->arg1);
 			dbc(OP_MOV, 2, 255, NULL);
@@ -107,7 +121,9 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			function_bcode = (solid_bytecode *) malloc(
 					sizeof(solid_bytecode) * 1024);
 			fi = 0;
-			fpn(node->arg1);
+			if (node->arg1 != NULL) {
+				fpn(node->arg1);
+			}
 			fpn(node->arg2);
 			dbc(OP_FN, 255, 0, function_bcode);
 			function_bcode = NULL;
@@ -127,94 +143,10 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			pn(node->arg1);
 			dbc(OP_END, 0, 0, NULL);
 			break;
-		case CLASS:
-			if (node->arg1 != NULL) {
-				pn(node->arg1);
-				dbc(OP_MOV, 2, 255, NULL);
-			} else {
-				dbc(OP_STOREINT, 2, 0, NULL);
-			}
-			dbc(OP_CLASS, 0, 2, NULL);
-			pn(node->arg2);
-			dbc(OP_ENDCLASS, 0, 0, NULL);
-			dbc(OP_MOV, 255, 0, NULL);
-			break;
-		case NEW:
+		case NS:
+			dbc(OP_NS, 255, 0, NULL);
 			pn(node->arg1);
-			dbc(OP_NEW, 255, 255, NULL);
-			break;
-		case PLUS:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_ADD, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case MINUS:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_SUB, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case MUL:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_MUL, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case DIV:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_DIV, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case CEQ:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_EQ, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case CLT:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_LT, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case CLTE:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_LTE, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case CGT:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_GT, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
-		case CGTE:
-			pn(node->arg1);
-			dbc(OP_MOV, 3, 255, NULL);
-			pn(node->arg2);
-			dbc(OP_MOV, 2, 255, NULL);
-			dbc(OP_GTE, 2, 3, NULL);
-			dbc(OP_MOV, 255, 2, NULL);
-			break;
+			dbc(OP_ENDNS, 255, 0, NULL);
 	}
 	return i;
 }

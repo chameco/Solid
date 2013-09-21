@@ -35,6 +35,7 @@ ast_node *make_node(node_ins ins, ast_node *arg1, ast_node *arg2, node_val val)
 		return r;
 	}
 	log_err("malloc failure in make_node");
+	exit(1);
 }
 
 ast_node *const_integer_node(int i)

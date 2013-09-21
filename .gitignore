@@ -1,6 +1,9 @@
 session.vim
 solid
 *.o
+*.a
+*.so
+*.so.*
 parser.h
 parser.c
 lexer.h

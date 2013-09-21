@@ -12,22 +12,17 @@
 %parse-param {ast_node **root}
 %parse-param {void *scanner}
 
-%token <node> TIDENTIFIER TSTRING TINTEGER
+%token <node> TIDENTIFIER TINLINE_IDENTIFIER TSTRING TINTEGER
 %token <token> TTRUE TFALSE
 
-%token <token> TCEQ TCLT TCLE TCGT TCGE
-
-%token <token> TSEMICOLON;
+%token <token> TSEMICOLON TNEWLINE;
 %token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT
 
-%token <token> TIF TWHILE TEQUALS TFN TRETURN TCLASS TNEW
+%token <token> TIF TWHILE TEQUALS TFN TNS TRETURN
 
 %type <node> program
 
-%type <node> stmt_list ns_var expr constant identifier func_args param_list
-
-%left TPLUS TMINUS
-%left TMUL TDIV
+%type <node> stmt_list ns_var expr constant identifier func_args param_list list_items
 
 %start program
 
@@ -47,25 +42,17 @@ ns_var : identifier {$$ = make_node(NS_VAR, $1, NULL, null_value());}
 
 
 expr : constant {$$ = $1;}
+     | expr TINLINE_IDENTIFIER expr {$$ = make_node(CALL,
+     make_node(GET, make_node(NS_VAR, $2, NULL, null_value()), NULL, null_value()),
+     make_node(FUNC_ARGS, $3, make_node(FUNC_ARGS, $1, NULL, null_value()), null_value()), null_value());}
      | expr TLPAREN func_args TRPAREN {$$ = make_node(CALL, $1, $3, null_value());}
      | ns_var {$$ = make_node(GET, $1, NULL, null_value());}
      | ns_var TEQUALS expr {$$ = make_node(SET, $3, $1, null_value());}
-     | TNEW expr {$$ = make_node(NEW, $2, NULL, null_value());}
-     | expr TPLUS expr {$$ = make_node(PLUS, $1, $3, null_value());}
-     | expr TMINUS expr {$$ = make_node(MINUS, $1, $3, null_value());}
-     | expr TMUL expr {$$ = make_node(MUL, $1, $3, null_value());}
-     | expr TDIV expr {$$ = make_node(DIV, $1, $3, null_value());}
-     | expr TCEQ expr {$$ = make_node(CEQ, $1, $3, null_value());}
-     | expr TCLT expr {$$ = make_node(CLT, $1, $3, null_value());}
-     | expr TCLE expr {$$ = make_node(CLTE, $1, $3, null_value());}
-     | expr TCGT expr {$$ = make_node(CGT, $1, $3, null_value());}
-     | expr TCGE expr {$$ = make_node(CGTE, $1, $3, null_value());}
      | TLBRACE stmt_list TRBRACE {$$ = make_node(BLOCK, $2, NULL, null_value());}
      | TIF expr expr {$$ = make_node(IF, $2, $3, null_value());}
      | TWHILE expr expr {$$ = make_node(WHILE, $2, $3, null_value());}
-     | TFN TLPAREN param_list TRPAREN expr {$$ = make_node(FN, $3, $5, null_value());}
-     | TCLASS TLPAREN TRPAREN expr {$$ = make_node(CLASS, NULL, $4, null_value());}
-     | TCLASS TLPAREN expr TRPAREN expr {$$ = make_node(CLASS, $3, $5, null_value());} 
+     | TFN param_list expr {$$ = make_node(FN, $2, $3, null_value());}
+     | TNS expr {$$ = make_node(NS, $2, NULL, null_value());}
      | TRETURN expr {$$ = make_node(RETURN, $2, NULL, null_value());}
      ;
 
@@ -73,9 +60,10 @@ constant : TSTRING {$$ = $1;}
 	 | TINTEGER {$$ = $1;}
 	 | TTRUE {$$ = const_bool_node(1);}
 	 | TFALSE {$$ = const_bool_node(0);}
+	 | TLSQUARE list_items TRSQUARE {$$ = make_node(CONST_LIST, $2, NULL, null_value());}
 	 ;
 
-identifier : TIDENTIFIER {$$ = $1;}
+identifier : TIDENTIFIER | TINLINE_IDENTIFIER {$$ = $1;}
 	   ;
 
 param_list : /* blank */ {$$ = make_node(PARAM_LIST, NULL, NULL, null_value());}
@@ -87,5 +75,10 @@ func_args : /* blank */ {$$ = make_node(FUNC_ARGS, NULL, NULL, null_value());}
 	  | expr {$$ = make_node(FUNC_ARGS, $1, NULL, null_value());}
 	  | func_args TCOMMA expr {$$ = make_node(FUNC_ARGS, $3, $1, null_value());}
 	  ;
+
+list_items : /* blank */ {$$ = make_node(LIST_BODY, NULL, NULL, null_value());}
+	   | expr {$$ = make_node(LIST_BODY, $1, NULL, null_value());}
+	   | list_items TCOMMA expr {$$ = make_node(LIST_BODY, $3, $1, null_value());}
+	   ;
 
 %%

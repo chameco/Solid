@@ -1,13 +1,14 @@
-attr = 20;
-foo = class () {
-	attr = 10;
-	meth = fn (x) { attr = attr + x; };
-};
+import("Math.sol")
+import("/home/samuel/projects/solid/_math.so")
 
-meth = foo.meth;
-bar = new foo;
-meth2 = bar.meth;
+^ = Math.^
 
-foo.attr = 200;
-x = foo.attr;
-y = bar.attr;
+print(plus(2, 3))
+
+print(10 ^ 2)
+
+x = [10, 20, 30]
+
+first = fn list list !! 1
+
+print(first(x))

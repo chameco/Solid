@@ -18,22 +18,14 @@ typedef enum node_ins {
 	CONST_INT,
 	CONST_STR,
 	CONST_BOOL,
+	CONST_LIST,
+	LIST_BODY,
 	IF,
 	WHILE,
 	FN,
 	PARAM_LIST,
 	RETURN,
-	CLASS,
-	NEW,
-	PLUS,
-	MINUS,
-	MUL,
-	DIV,
-	CEQ,
-	CLT,
-	CLTE,
-	CGT,
-	CGTE,
+	NS
 } node_ins;
 
 typedef union node_val {

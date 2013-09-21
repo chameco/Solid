@@ -19,26 +19,19 @@ typedef enum solid_ins {
 	OP_STOREINT,
 	OP_STORESTR,
 	OP_STOREBOOL,
+	OP_STORELIST,
+	OP_PUSHLIST,
+	OP_POPLIST,
 	OP_MOV,
 	OP_GLOBALNS,
 	OP_LOCALNS,
 	OP_FN,
-	OP_CLASS,
-	OP_ENDCLASS,
-	OP_NEW,
+	OP_NS,
+	OP_ENDNS, 
 	OP_JMP,
 	OP_JMPIF,
 	OP_CALL,
-	OP_ADD,
-	OP_SUB,
-	OP_MUL,
-	OP_DIV,
-	OP_EQ,
 	OP_NOT,
-	OP_LT,
-	OP_LTE,
-	OP_GT,
-	OP_GTE,
 } solid_ins;
 
 typedef struct solid_bytecode {
@@ -63,36 +56,38 @@ typedef struct solid_vm {
 solid_vm *make_solid_vm();
 
 void push_stack(solid_vm *vm, solid_object *o);
-
 solid_object *pop_stack(solid_vm *vm);
 
-void push_namespace(solid_vm *vm);
+void push_list(solid_object *list, solid_object *o);
+solid_object *pop_list(solid_object *list);
 
+void push_namespace(solid_vm *vm);
 void pop_namespace(solid_vm *vm);
 
 void push_predefined_namespace(solid_vm *vm, solid_object *namespace);
-
-void pop_predefined_namespace(solid_vm *vm);
+solid_object *pop_predefined_namespace(solid_vm *vm);
 
 solid_object *get_current_namespace(solid_vm *vm);
 
 solid_object *define_function(solid_bytecode *inslist, solid_object *closure);
 solid_object *define_c_function(void (*function)(solid_vm *vm));
-solid_object *define_class(solid_object *super);
 
-solid_object *solid_add(solid_object *a, solid_object *b);
-solid_object *solid_sub(solid_object *a, solid_object *b);
-solid_object *solid_mul(solid_object *a, solid_object *b);
-solid_object *solid_div(solid_object *a, solid_object *b);
-solid_object *solid_eq(solid_object *a, solid_object *b);
+void solid_nth_list(solid_vm *vm);
+void solid_print(solid_vm *vm);
+void solid_add(solid_vm *vm);
+void solid_sub(solid_vm *vm);
+void solid_mul(solid_vm *vm);
+void solid_div(solid_vm *vm);
+void solid_eq(solid_vm *vm);
+void solid_lt(solid_vm *vm);
+void solid_lte(solid_vm *vm);
+void solid_gt(solid_vm *vm);
+void solid_gte(solid_vm *vm);
+
 solid_object *solid_not(solid_object *o);
-solid_object *solid_lt(solid_object *a, solid_object *b);
-solid_object *solid_lte(solid_object *a, solid_object *b);
-solid_object *solid_gt(solid_object *a, solid_object *b);
-solid_object *solid_gte(solid_object *a, solid_object *b);
 
 solid_bytecode bc(solid_ins i, int a, int b, void *meta);
 
-solid_object *solid_call_func(solid_vm *vm, solid_object *func);
+void solid_call_func(solid_vm *vm, solid_object *func);
 
 #endif

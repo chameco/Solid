@@ -53,77 +53,10 @@ int namespace_has(solid_object *ns, solid_object *name)
 	}
 }
 
-void initialize_builtin_classes(solid_object *global_ns) //Checks allow us to initialize in any namespace while retaining references
-{
-	SOLID_CLASS_OBJECT = SOLID_CLASS_OBJECT == NULL ? solid_class(NULL)
-		: SOLID_CLASS_OBJECT;
-	set_namespace(global_ns, solid_str("Object"), SOLID_CLASS_OBJECT);
-
-	SOLID_CLASS_INTEGER = SOLID_CLASS_INTEGER == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_INTEGER;
-	set_namespace(global_ns, solid_str("Integer"), SOLID_CLASS_INTEGER);
-
-	SOLID_CLASS_STRING = SOLID_CLASS_STRING == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_STRING;
-	set_namespace(global_ns, solid_str("String"), SOLID_CLASS_STRING);
-
-	SOLID_CLASS_BOOLEAN = SOLID_CLASS_BOOLEAN == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_BOOLEAN;
-	set_namespace(global_ns, solid_str("Boolean"), SOLID_CLASS_BOOLEAN);
-
-	SOLID_CLASS_FUNC = SOLID_CLASS_FUNC == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_FUNC;
-	set_namespace(global_ns, solid_str("Function"), SOLID_CLASS_FUNC);
-
-	SOLID_CLASS_FUNC = SOLID_CLASS_CFUNC == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_CFUNC;
-	set_namespace(global_ns, solid_str("CFunction"), SOLID_CLASS_CFUNC);
-
-	SOLID_CLASS_NODE = SOLID_CLASS_NODE == NULL ? solid_class(SOLID_CLASS_OBJECT)
-		: SOLID_CLASS_FUNC;
-	set_namespace(global_ns, solid_str("Node"), SOLID_CLASS_NODE);
-}
-
-solid_object *get_builtin_class_object()
-{
-	return SOLID_CLASS_OBJECT;
-}
-
-solid_object *get_builtin_class_integer()
-{
-	return SOLID_CLASS_INTEGER;
-}
-
-solid_object *get_builtin_class_string()
-{
-	return SOLID_CLASS_STRING;
-}
-
-solid_object *get_builtin_class_boolean()
-{
-	return SOLID_CLASS_BOOLEAN;
-}
-
-solid_object *get_builtin_class_func()
-{
-	return SOLID_CLASS_FUNC;
-}
-
-solid_object *get_builtin_class_cfunc()
-{
-	return SOLID_CLASS_CFUNC;
-}
-
-solid_object *get_builtin_class_node()
-{
-	return SOLID_CLASS_NODE;
-}
-
 solid_object *make_object()
 {
 	solid_object *ret = (solid_object *) malloc(sizeof(solid_object));
 	ret->type = T_NULL;
-	ret->class = SOLID_CLASS_OBJECT;
 	ret->data = NULL;
 	return ret;
 }
@@ -140,7 +73,6 @@ solid_object *solid_int(int val)
 {
 	solid_object *ret = make_object();
 	ret->type = T_INT;
-	ret->class = SOLID_CLASS_INTEGER;
 	ret->data = malloc(sizeof(int));
 	memcpy(ret->data, &val, sizeof(int));
 	return ret;
@@ -150,7 +82,6 @@ solid_object *solid_str(char *val)
 {
 	solid_object *ret = make_object();
 	ret->type = T_STR;
-	ret->class = SOLID_CLASS_STRING;
 	ret->data = malloc(strlen(val) + sizeof(char)); //Need the null byte
 	strcpy((char *) ret->data, val);
 	return ret;
@@ -160,10 +91,17 @@ solid_object *solid_bool(int val)
 {
 	solid_object *ret = make_object();
 	ret->type = T_BOOL;
-	ret->class = SOLID_CLASS_BOOLEAN;
 	ret->data = malloc(sizeof(int));
 	int temp = (val != 0);
 	memcpy(ret->data, &temp, sizeof(int));
+	return ret;
+}
+
+solid_object *solid_list(list_node *l)
+{
+	solid_object *ret = make_object();
+	ret->type = T_BOOL;
+	ret->data = l;
 	return ret;
 }
 
@@ -171,7 +109,6 @@ solid_object *solid_func()
 {
 	solid_object *ret = make_object();
 	ret->type = T_FUNC;
-	ret->class = SOLID_CLASS_FUNC;
 	ret->data = NULL;
 	return ret; //We don't do anything here: all bytecode will be added later
 }
@@ -180,7 +117,6 @@ solid_object *solid_cfunc()
 {
 	solid_object *ret = make_object();
 	ret->type = T_CFUNC;
-	ret->class = SOLID_CLASS_CFUNC;
 	ret->data = NULL;
 	return ret;
 }
@@ -189,19 +125,7 @@ solid_object *solid_node()
 {
 	solid_object *ret = make_object();
 	ret->type = T_NODE;
-	ret->class = SOLID_CLASS_NODE;
 	ret->data = NULL;
-	return ret;
-}
-
-solid_object *solid_class(solid_object *super)
-{
-	solid_object *ret;
-	if (super != NULL) { //Should only be null for Object
-		ret = (void *) instance_from_class(super);
-	} else {
-		ret = (void *) solid_instance();
-	}
 	return ret;
 }
 
@@ -213,7 +137,7 @@ void delete_object(solid_object *o) //More than this is needed to truly delete a
 	free(o);
 }
 
-solid_object *instance_from_class(solid_object *class)
+solid_object *clone_object(solid_object *class)
 {
 	if (class->type != T_INSTANCE) {
 		log_err("Attempt to instantiate primitive");
@@ -221,7 +145,6 @@ solid_object *instance_from_class(solid_object *class)
 	} else {
 		solid_object *ret = make_object();
 		ret->type = T_INSTANCE;
-		ret->class = class;
 		ret->data = (void *) copy_hash((hash_map *) class->data);
 		return ret;
 	}

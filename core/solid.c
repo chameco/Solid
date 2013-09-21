@@ -18,7 +18,8 @@ ast_node *parse_expr(char *expr)
 	yyscan_t scanner;
 	YY_BUFFER_STATE state;
 
-	yylex_init(&scanner);
+	scanner_state scan_state = {.insert = 0};
+	yylex_init_extra(&scan_state, &scanner);
 	state = yy_scan_string(expr, scanner);
 	yyparse(&ret, scanner);
 	yy_delete_buffer(state, scanner);
@@ -30,18 +31,10 @@ ast_node *parse_expr(char *expr)
 ast_node *parse_file(char *path)
 {
 	FILE *f = fopen(path, "r");
-	char buffer[1024 * 1024];
+	char buffer[1024 * 1024] = {0};
 	fread(buffer, sizeof(char), 1024 * 1024, f);
 	fclose(f);
 	return parse_expr(buffer);
-}
-
-void solid_print(solid_vm *vm)
-{
-	solid_object *in = pop_stack(vm);
-	char *input = get_str_value(in);
-	fprintf(stdout, "%s\n", input);
-	vm->regs[255] = in;
 }
 
 void spit_function(char *path, solid_object *func)
@@ -55,25 +48,48 @@ void spit_function(char *path, solid_object *func)
 	}
 }
 
+void solid_compile(solid_vm *vm)
+{
+	vm->regs[255] = parse_tree(parse_expr(get_str_value(pop_stack(vm))));
+}
+
+void solid_import(solid_vm *vm)
+{
+	char *input = get_str_value(pop_stack(vm));
+	char *dot = strrchr(input, '.');
+	char *extension;
+	if (!dot || dot == input) {
+		extension = "";
+	}
+	extension = dot + 1;
+	if (strcmp(extension, "sol") == 0) {
+		solid_object *func = parse_tree(parse_file(input));
+		solid_call_func(vm, func);
+	} else if (strcmp(extension, "so") == 0) {
+		void *handle = dlopen(input, RTLD_LAZY);
+		void (*init)(solid_vm *);
+		if (handle == NULL) {
+			log_err("Loading external library %s failed with error %s", input, dlerror());
+		}
+		dlerror();
+		*(void **) (&init) = dlsym(handle, "solid_init");
+		init(vm);
+		//dlclose(handle);
+	}
+}
+
 void solid_repl()
 {
 	size_t n = 256;
 	char *buffer = (char *) malloc(sizeof(char) * n);
 	solid_vm *vm = make_solid_vm();
+	set_namespace(get_current_namespace(vm), solid_str("compile"), define_c_function(solid_compile));
+	set_namespace(get_current_namespace(vm), solid_str("import"), define_c_function(solid_import));
 	while (printf("%s", "solid> "), getline(&buffer, &n, stdin) != -1) {
 		solid_object *curexpr = parse_tree(parse_expr(buffer));
 		solid_call_func(vm, curexpr);
-		if (vm->regs[255]->type == T_INT) {
-			printf("%d\n", get_int_value(vm->regs[255]));
-		} else if (vm->regs[255]->type == T_STR) {
-			printf("%s\n", get_str_value(vm->regs[255]));
-		} else if (vm->regs[255]->type == T_FUNC) {
-			printf("%s\n", "Function");
-		} else if (vm->regs[255]->type == T_INSTANCE) {
-			printf("%s\n", "Object");
-		} else {
-			printf("%s\n", "Unknown");
-		}
+		push_stack(vm, vm->regs[255]);
+		solid_print(vm);
 	}
 }
 
@@ -82,7 +98,8 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		solid_object *mainfunc = parse_tree(parse_file(argv[1]));
 		solid_vm *vm = make_solid_vm();
-		set_namespace(get_current_namespace(vm), solid_str("print"), define_c_function(solid_print));
+		set_namespace(get_current_namespace(vm), solid_str("compile"), define_c_function(solid_compile));
+		set_namespace(get_current_namespace(vm), solid_str("import"), define_c_function(solid_import));
 		solid_call_func(vm, mainfunc);
 	} else {
 		solid_repl();
