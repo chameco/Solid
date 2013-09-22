@@ -91,7 +91,7 @@ Namespaces: A namespace is pretty much a hash table or object.
     ^ = Math.^;
     print(10 ^ 2)
 
-An complete object system based on cloning namespaces is in the works, but right now feel free to call `clone` with a namespace argument to both derive classes and make instances. Don't worry about the overhead of having copies of functions in instances, as functions are represented as pointers internally.
+A complete object system based on cloning namespaces is in the works, but right now feel free to call `clone` with a namespace argument to both derive classes and make instances. Don't worry about the overhead of having copies of functions in instances, as functions are represented as pointers internally.
 
 Lists: Make linked lists with the following syntax: `x = ["a", "b", "c", 1, 2, 3]`. Index them like so: `x !! 1`, which would evaluate to `"b"`. Lists are immutable, but you can add items with the cons operator, `:`. Another example:
 
