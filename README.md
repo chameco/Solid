@@ -144,3 +144,7 @@ But wait, what if you want to use C from inside solid, rather than solid from in
 Contributing
 -------------
 Documentation is currently nonexistent, but the code is pretty standard object-oriented C99 (generally one main struct per file, "methods" are functions that take a struct pointer as the first argument, everything is allocated with `malloc`). Start in ast.c and vm.c.
+
+License
+--------
+Solid is distributed under the MIT license. See LICENSE.md.
