@@ -15,6 +15,7 @@ typedef enum solid_type {
 	T_INT,
 	T_STR,
 	T_BOOL,
+	T_LIST,
 	T_FUNC,
 	T_CFUNC,
 	T_NODE,

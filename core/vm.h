@@ -74,6 +74,8 @@ solid_object *define_c_function(void (*function)(solid_vm *vm));
 
 void solid_nth_list(solid_vm *vm);
 void solid_print(solid_vm *vm);
+void solid_clone(solid_vm *vm);
+void solid_cons(solid_vm *vm);
 void solid_add(solid_vm *vm);
 void solid_sub(solid_vm *vm);
 void solid_mul(solid_vm *vm);

@@ -100,7 +100,7 @@ solid_object *solid_bool(int val)
 solid_object *solid_list(list_node *l)
 {
 	solid_object *ret = make_object();
-	ret->type = T_BOOL;
+	ret->type = T_LIST;
 	ret->data = l;
 	return ret;
 }
@@ -131,16 +131,13 @@ solid_object *solid_node()
 
 void delete_object(solid_object *o) //More than this is needed to truly delete an object,
 {                                   //possibly add a garbage collector in vm?
-	if (o->data != NULL) {
-		free(o->data);
-	}
 	free(o);
 }
 
 solid_object *clone_object(solid_object *class)
 {
 	if (class->type != T_INSTANCE) {
-		log_err("Attempt to instantiate primitive");
+		log_err("Attempt to clone non-namespace object");
 		exit(1);
 	} else {
 		solid_object *ret = make_object();

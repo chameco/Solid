@@ -10,6 +10,8 @@ solid_vm *make_solid_vm()
 	ret->namespace_stack_pointer = 0;
 	set_namespace(get_current_namespace(ret), solid_str("!!"), define_c_function(solid_nth_list));
 	set_namespace(get_current_namespace(ret), solid_str("print"), define_c_function(solid_print));
+	set_namespace(get_current_namespace(ret), solid_str("clone"), define_c_function(solid_clone));
+	set_namespace(get_current_namespace(ret), solid_str(":"), define_c_function(solid_cons));
 	set_namespace(get_current_namespace(ret), solid_str("+"), define_c_function(solid_add));
 	set_namespace(get_current_namespace(ret), solid_str("-"), define_c_function(solid_sub));
 	set_namespace(get_current_namespace(ret), solid_str("*"), define_c_function(solid_mul));
@@ -95,6 +97,9 @@ solid_object *define_function(solid_bytecode *inslist, solid_object *closure)
 	fval->bcode = inslist;
 	fval->closure = closure;
 	ret->data = (void *) fval;
+	if (fval->closure != NULL) {
+		set_namespace(fval->closure, solid_str("this"), ret);
+	}
 	return ret;
 }
 
@@ -113,14 +118,14 @@ void solid_nth_list(solid_vm *vm)
 	list_node *l = (list_node *) list->data;
 	int counter = 0;
 	list_node *c;
-	for (c = l; c->next != NULL; c = c->next) {
+	for (c = l->next; c->next != NULL; c = c->next) {
 		if (c->data != NULL) {
-			if (counter - 1 == i) {
+			if (counter == i) {
 				vm->regs[255] = (solid_object *) c->data;
 				return;
 			}
+			counter++;
 		}
-		counter++;
 	}
 	log_err("List index out of bounds");
 	exit(1);
@@ -141,6 +146,23 @@ void solid_print(solid_vm *vm)
 		fprintf(stdout, "Unknown of type %d\n", in->type);
 	}
 	vm->regs[255] = in;
+}
+
+void solid_clone(solid_vm *vm)
+{
+	solid_object *ns = pop_stack(vm);
+	vm->regs[255] = clone_object(ns);
+}
+
+void solid_cons(solid_vm *vm)
+{
+	solid_object *list = pop_stack(vm);
+	solid_object *elem = pop_stack(vm);
+	list_node *ret = make_list();
+	insert_list(ret, (void *) elem);
+	ret->next->next = (list_node *) list->data;
+	((list_node *) list->data)->prev = ret->next;
+	vm->regs[255] = solid_list(ret);
 }
 
 void solid_add(solid_vm *vm)
@@ -328,7 +350,7 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_FN:
-					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta, get_current_namespace(vm));
+					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta, clone_object(get_current_namespace(vm)));
 					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_NS:

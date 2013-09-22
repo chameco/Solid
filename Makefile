@@ -1,6 +1,6 @@
-OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o
+OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
 CC = clang
-CFLAGS = -I/usr/local/include -I. -Icore -Wall -g -fPIC
+CFLAGS = -std=c99 -I/usr/local/include -I. -Icore -Wall -g -fPIC
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
@@ -16,7 +16,7 @@ all : deps parser $(OBJECTS)
 parser: core/parser.y core/parser.l
 	bison -d core/parser.y
 	flex core/parser.l
-	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g
+	$(CC) $(CFLAGS) -Wno-unneeded-internal-declaration -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g
 	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c parser.c -o parser.o -g
 tarball:
 	mkdir solid-$(VERSION)
@@ -33,6 +33,7 @@ install: all shared
 	$(INSTALL_DATA) parser.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/solid.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/common.h $(DESTDIR)$(includedir)/solid
+	$(INSTALL_DATA) core/scanner_state.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/node.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/vm.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/ast.h $(DESTDIR)$(includedir)/solid
@@ -41,7 +42,7 @@ static: parser $(OBJECTS)
 	ar -cvq libsolid.a parser.o lexer.o $(OBJECTS)
 shared: parser $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libsolid.so.1.0 -o libsolid.so.1.0 parser.o lexer.o $(OBJECTS)
-lib: lib/$(TARGET).o
+lib: install lib/$(TARGET).o
 	$(CC) -shared -Wl,-soname,$(TARGET).so -lsolid -o $(TARGET).so lib/$(TARGET).o
 deps:
 	mkdir -p deps
@@ -52,4 +53,3 @@ clean:
 	rm -f parser.c parser.h lexer.c lexer.h
 	rm -f parser.o lexer.o $(OBJECTS)
 	rm -f lib/*.o
-	rm -f deps -r
