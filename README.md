@@ -1,6 +1,8 @@
 solid - a minimalist language with a tiny VM ![Build Status] (https://travis-ci.org/chameco/Solid.png)
 ============================================
 
+Solid is a simple, elegant language with a super simple C API. Yes, that means you can embed it into your application or game with almost no effort.
+
 Installation
 -------------
 
@@ -51,9 +53,9 @@ Additionally, functions are all full closures. The classic example:
 
     make_counter = fn do
         counter = 0
-	return fn do
-	    counter = counter + 1
-	end
+        return fn do
+            counter = counter + 1
+        end
     end
     
     c1 = make_counter()
@@ -69,7 +71,7 @@ Inline functions: If a function only includes symbols in its name, you can call 
 
     ^ = fn a, b do
         if b == 0 return 1
-	a * this(a, b - 1)
+        a * this(a, b - 1)
     end
     
     print(10 ^ 2)
@@ -115,24 +117,27 @@ Now this is where it gets interesting. Solid exposes a complete C API that allow
  * Convert C primitives to solid objects with `solid_str(<string>)`, `solid_int(<integer>)`, and `solid_bool(<integer>)`.
  * Use namespaces with `get_namespace(<namespace>, <solid_string>)` and `set_namespace(<namespace>, <solid_string>, <object>)`. You can get the global namespace by calling `get_current_namespace(<vm>)`.
  * Turn a C function with declaration `void <function>(solid_vm *vm)` into a callable solid object function with `define_cfunc(<function>)`. You can access arguments by popping the VM stack (you'll get them in reverse order) with `pop_stack(<vm>)`, and return a value by setting `vm->regs[255]`.
- * To put it all together, here's a complete example of embedding solid into a C program:
+
+To put it all together, here's a complete example of embedding solid into a C program:
 
     #include <solid/solid.h>
     #include <stdio.h>
+    
     void hello_world(solid_vm *vm)
     {
-    	solid_object *argument = pop_stack(vm);
-	printf("Howdy, %s!\n", get_str_value(argument));
-	vm->regs[255] = solid_int(1336)
+        solid_object *argument = pop_stack(vm);
+        printf("Howdy, %s!\n", get_str_value(argument));
+        vm->regs[255] = solid_int(1336)
     }
     int main()
     {
-    	solid_vm *vm = make_solid_vm();
-	solid_object *compiled_expr = parse_tree(parse_expr("1 + my_function()"));
-	set_namespace(get_current_namespace(vm), solid_str("my_function"), define_cfunc(hello_world));
-	solid_call_func(vm, compiled_expr);
-	printf("solid is super %d", get_int_value(vm->regs[255]));
+        solid_vm *vm = make_solid_vm();
+        solid_object *compiled_expr = parse_tree(parse_expr("1 + my_function()"));
+        set_namespace(get_current_namespace(vm), solid_str("my_function"), define_cfunc(hello_world));
+        solid_call_func(vm, compiled_expr);
+        printf("solid is super %d", get_int_value(vm->regs[255]));
     }
+
 
 But wait, what if you want to use C from inside solid, rather than solid from inside C? Well, you do (almost) the exact same thing. The `import` function is capable of loading shared libraries with the extension `.so`. When loaded, solid will call an arbitrary, user-defined function named `solid_init` with the signature `void solid_init(solid_vm *vm)` inside the library, passing it the current VM. From there, you can do everything that we did above, defining functions, modifying namespaces, etc. Don't want to go through the trouble to manually build a shared library? Solid has you covered. Just throw your C file `whatever.c` containing `solid_init` in the `lib` folder of the solid source tree, and run `make lib TARGET=whatever`, and it will create a shared library called `whatever.so` in the solid source root, which can now be freely imported.
 
