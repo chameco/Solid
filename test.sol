@@ -1,9 +1,8 @@
 import("Math.sol")
-import("/home/samuel/projects/solid/_math.so")
 
 ^ = Math.^
 
-print(plus(2, 3))
+print(Math.plus(2, 3))
 
 print(10 ^ 2)
 
