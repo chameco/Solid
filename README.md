@@ -6,7 +6,9 @@ Solid is a simple, elegant language with a super simple C API. Yes, that means y
 Installation
 -------------
 
-The Makefile should automagically fetch dependencies and stuff. Just do:
+You'll want Bison (3.0.0), Flex (2.5), and a C compiler.
+
+The Makefile should automagically fetch other dependencies and stuff. Just do:
 
     git clone http://github.com/chameco/Solid
     cd Solid
