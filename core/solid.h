@@ -1,5 +1,6 @@
 #ifndef SOLID_SOLID_H
 #define SOLID_SOLID_H
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>

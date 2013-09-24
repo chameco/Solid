@@ -306,30 +306,24 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 				case OP_POP:
 					vm->regs[cur.a] = pop_stack(vm);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GET:
 					vm->regs[cur.a] = get_namespace(vm->regs[cur.b], vm->regs[cur.a]);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_SET:
 					set_namespace(vm->regs[cur.b], solid_str((char *) cur.meta), vm->regs[cur.a]);
 					break;
 				case OP_STOREINT:
 					vm->regs[cur.a] = solid_int(cur.b);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_STORESTR:
 					vm->regs[cur.a] = solid_str((char *) cur.meta);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_STOREBOOL:
 					vm->regs[cur.a] = solid_bool(cur.b);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_STORELIST:
 					vm->regs[cur.a] = solid_list(make_list());
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_PUSHLIST:
 					push_list(vm->regs[cur.a], vm->regs[cur.b]);
@@ -339,19 +333,15 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 				case OP_MOV:
 					vm->regs[cur.a] = vm->regs[cur.b];
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_GLOBALNS:
 					vm->regs[cur.a] = vm->namespace_stack[0];
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_LOCALNS:
 					vm->regs[cur.a] = get_current_namespace(vm);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_FN:
 					vm->regs[cur.a] = define_function((solid_bytecode *) cur.meta, clone_object(get_current_namespace(vm)));
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 				case OP_NS:
 					vm->regs[cur.a] = clone_object(get_current_namespace(vm));
@@ -373,7 +363,6 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 				case OP_NOT:
 					vm->regs[cur.a] = solid_not(vm->regs[cur.a]);
-					regdebug("vm->regs[%d]->type: %d", cur.a, vm->regs[cur.a]->type);
 					break;
 			}
 		}
