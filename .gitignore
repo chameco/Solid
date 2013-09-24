@@ -1,5 +1,7 @@
 session.vim
 solid
+deps
+.ycm*
 *.o
 *.a
 *.so
