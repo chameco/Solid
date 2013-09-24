@@ -34,7 +34,7 @@ Blocks: Anywhere you can have a single expression, you can have a block. Blocks 
     c = 0
     while c < 10 do
     	print(c)
-	c = c + 1
+    	c = c + 1
     end
 
     c = 0
@@ -46,7 +46,7 @@ Functions: You can get an anonymous function like so: `fn a a * a`. But wait, ho
 
     f = fn a do
     	print(a)
-	a * a
+    	a * a
     end
     
     print(f(10))
@@ -85,7 +85,7 @@ Namespaces: A namespace is pretty much a hash table or object.
     Math = ns do
         ^ = fn a, b do
             if b == 0 return 1
-	    a * a ^ b - 1
+            a * a ^ b - 1
         end
     end
     
