@@ -22,6 +22,7 @@ int f(int token, yyscan_t scanner);
 %%
 
 [ \t\r]                 {}
+#.*                     {}
 "if"                    {int temp = f(TIF, yyscanner); if (temp) return temp;}
 "while"                 {int temp = f(TWHILE, yyscanner); if (temp) return temp;}
 "fn"                    {int temp = f(TFN, yyscanner); if (temp) return temp;}
