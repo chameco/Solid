@@ -41,10 +41,10 @@ int f(int token, yyscan_t scanner);
 ","                     {int temp = f(TCOMMA, yyscanner); if (temp) return temp;}
 ";"                     {int temp = f(TSEMICOLON, yyscanner); if (temp) return temp;}
 "\n"                    {int temp = f(TNEWLINE, yyscanner); if (temp) return temp;}
-(-|[+*/<>=^&%:!])*      {yylval->node = identifier_node(yytext); int temp = f(TINLINE_IDENTIFIER, yyscanner); if (temp) return temp;}
-[a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = identifier_node(yytext); int temp = f(TIDENTIFIER, yyscanner); if (temp) return temp;}
-\"([^\\\"]|\\.)*\"      {yytext[strlen(yytext) - 1] = '\0'; yylval->node = const_string_node(yytext+1); int temp = f(TSTRING, yyscanner); if (temp) return temp;}
-[0-9]+                  {yylval->node = const_integer_node(atoi(yytext)); int temp = f(TINTEGER, yyscanner); if (temp) return temp;}
+(-|[+*/<>=^&%:!])*      {yylval->node = solid_identifier_node(yytext); int temp = f(TINLINE_IDENTIFIER, yyscanner); if (temp) return temp;}
+[a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = solid_identifier_node(yytext); int temp = f(TIDENTIFIER, yyscanner); if (temp) return temp;}
+\"([^\\\"]|\\.)*\"      {yytext[strlen(yytext) - 1] = '\0'; yylval->node = solid_const_string_node(yytext+1); int temp = f(TSTRING, yyscanner); if (temp) return temp;}
+[0-9]+                  {yylval->node = solid_const_integer_node(atoi(yytext)); int temp = f(TINTEGER, yyscanner); if (temp) return temp;}
 .                       {log_err("Unknown token %s", yytext); yyterminate();}
 
 %%

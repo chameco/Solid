@@ -16,9 +16,9 @@
 #include "common.h"
 #include "lexer.h"
 
-int yyparse(ast_node **expression, yyscan_t scanner);
+int yyparse(solid_ast_node **expression, yyscan_t scanner);
 
-ast_node *parse_expr(char *expr);
+solid_ast_node *solid_parse_expr(char *expr);
 
-ast_node *parse_file(char *path);
+solid_ast_node *solid_parse_file(char *path);
 #endif

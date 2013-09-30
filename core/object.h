@@ -26,10 +26,10 @@ typedef struct solid_object {
 	void *data;
 } solid_object;
 
-void set_namespace(solid_object *ns, solid_object *name, solid_object *o);
-solid_object *get_namespace(solid_object *ns, solid_object *name);
-int namespace_has(solid_object *ns, solid_object *name);
-solid_object *make_object();
+void solid_set_namespace(solid_object *ns, solid_object *name, solid_object *o);
+solid_object *solid_get_namespace(solid_object *ns, solid_object *name);
+int solid_namespace_has(solid_object *ns, solid_object *name);
+solid_object *solid_make_object();
 solid_object *solid_instance();
 solid_object *solid_int(int val);
 solid_object *solid_str(char *val);
@@ -39,11 +39,11 @@ solid_object *solid_func();
 solid_object *solid_cfunc();
 solid_object *solid_node();
 
-void delete_object(solid_object *o);
-solid_object *clone_object(solid_object *class);
+void solid_delete_object(solid_object *o);
+solid_object *solid_clone_object(solid_object *class);
 
-int get_int_value(solid_object *o);
-char *get_str_value(solid_object *o);
-int get_bool_value(solid_object *o);
+int solid_get_int_value(solid_object *o);
+char *solid_get_str_value(solid_object *o);
+int solid_get_bool_value(solid_object *o);
 
 #endif

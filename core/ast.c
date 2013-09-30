@@ -1,19 +1,19 @@
 #include "ast.h"
 
-#define dbc(I, A, B, M) bcode[i++] = bc(I, A, B, M)
-#define pn(N) i = parse_node(N, bcode, i)
-#define fdbc(I, A, B, M) function_bcode[fi++] = bc(I, A, B, M)
-#define fpn(N) fi = parse_node(N, function_bcode, fi)
+#define dbc(I, A, B, M) bcode[i++] = solid_bc(I, A, B, M)
+#define pn(N) i = solid_parse_node(N, bcode, i)
+#define fdbc(I, A, B, M) function_bcode[fi++] = solid_bc(I, A, B, M)
+#define fpn(N) fi = solid_parse_node(N, function_bcode, fi)
 
-solid_object *parse_tree(ast_node *tree)
+solid_object *solid_parse_tree(solid_ast_node *tree)
 {
 	solid_bytecode *bcode = (solid_bytecode *) malloc(
 			sizeof(solid_bytecode) * 1024);
-	int i = parse_node(tree, bcode, 0);
+	int i = solid_parse_node(tree, bcode, 0);
 	dbc(OP_END, 0, 0, NULL);
-	return define_function(bcode, NULL);
+	return solid_define_function(bcode, NULL);
 }
-int parse_node(ast_node *node, solid_bytecode *bcode, int i)
+int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 {
 	int temp[8] = {0};
 	solid_bytecode *function_bcode = NULL;
@@ -104,7 +104,7 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			temp[0] = i;
 			dbc(OP_NOP, 0, 0, NULL);
 			pn(node->arg2);
-			bcode[temp[0]] = bc(OP_JMPIF, i, 2, NULL);
+			bcode[temp[0]] = solid_bc(OP_JMPIF, i, 2, NULL);
 			break;
 		case WHILE:
 			temp[0] = i;
@@ -115,7 +115,7 @@ int parse_node(ast_node *node, solid_bytecode *bcode, int i)
 			dbc(OP_NOP, 0, 0, NULL);
 			pn(node->arg2);
 			dbc(OP_JMP, temp[0] - 1, 0, NULL);
-			bcode[temp[1]] = bc(OP_JMPIF, i, 2, NULL);
+			bcode[temp[1]] = solid_bc(OP_JMPIF, i, 2, NULL);
 			break;
 		case FN:
 			function_bcode = (solid_bytecode *) malloc(

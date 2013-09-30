@@ -127,17 +127,17 @@ To put it all together, here's a complete example of embedding solid into a C pr
     
     void hello_world(solid_vm *vm)
     {
-        solid_object *argument = pop_stack(vm);
-        printf("Howdy, %s!\n", get_str_value(argument));
+        solid_object *argument = solid_pop_stack(vm);
+        printf("Howdy, %s!\n", solid_get_str_value(argument));
         vm->regs[255] = solid_int(1336)
     }
     int main()
     {
-        solid_vm *vm = make_solid_vm();
-        solid_object *compiled_expr = parse_tree(parse_expr("1 + my_function()"));
-        set_namespace(get_current_namespace(vm), solid_str("my_function"), define_cfunc(hello_world));
+        solid_vm *vm = solid_make_vm();
+        solid_object *compiled_expr = solid_parse_tree(solid_parse_expr("1 + my_function()"));
+        solid_set_namespace(solid_get_current_namespace(vm), solid_str("my_function"), solid_define_cfunc(hello_world));
         solid_call_func(vm, compiled_expr);
-        printf("solid is super %d", get_int_value(vm->regs[255]));
+        printf("solid is super %d", solid_get_int_value(vm->regs[255]));
     }
 
 
