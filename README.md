@@ -111,14 +111,14 @@ Foreign Function Interface and API
 -----------------------------------
 Now this is where it gets interesting. Solid exposes a complete C API that allows for incredibly easy embedding. All you really need to know:
  * To use the API, include `<solid/solid.h>` and link with `-lsolid`.
- * Parse a file or expression into an AST with `parse_file(<path>)` and `parse_expr(<expr>`. Example: `ast_node *n = parse_expr("1 + 1");`
- * Compile an AST into a function with `parse_tree(<ast_node>)`. Example: `solid_object *func = parse_tree(parse_expr("1 + 1"));`
- * Make a virtual machine with `make_solid_vm()`. Example: `solid_vm *vm = make_solid_vm();`
+ * Parse a file or expression into an AST with `solid_parse_file(<path>)` and `solid_parse_expr(<expr>`. Example: `solid_ast_node *n = solid_parse_expr("1 + 1");`
+ * Compile an AST into a function with `solid_parse_tree(<ast_node>)`. Example: `solid_object *func = solid_parse_tree(solid_parse_expr("1 + 1"));`
+ * Make a virtual machine with `solid_make_vm()`. Example: `solid_vm *vm = solid_make_vm();`
  * Run code on a VM. Example: `solid_call_func(vm, func);`
- * Any expression you evaluate in solid puts the result in the return register, accesible at `vm->regs[255]`. However, this value will be of type `solid_object *`. To convert to C types, use `get_str_value(<object>)`, `get_int_value(<object>)`, and `get_bool_value(<object>)`.
+ * Any expression you evaluate in solid puts the result in the return register, accesible at `vm->regs[255]`. However, this value will be of type `solid_object *`. To convert to C types, use `solid_get_str_value(<object>)`, `solid_get_int_value(<object>)`, and `solid_get_bool_value(<object>)`.
  * Convert C primitives to solid objects with `solid_str(<string>)`, `solid_int(<integer>)`, and `solid_bool(<integer>)`.
- * Use namespaces with `get_namespace(<namespace>, <solid_string>)` and `set_namespace(<namespace>, <solid_string>, <object>)`. You can get the global namespace by calling `get_current_namespace(<vm>)`.
- * Turn a C function with declaration `void <function>(solid_vm *vm)` into a callable solid object function with `define_cfunc(<function>)`. You can access arguments by popping the VM stack (you'll get them in reverse order) with `pop_stack(<vm>)`, and return a value by setting `vm->regs[255]`.
+ * Use namespaces with `solid_get_namespace(<namespace>, <solid_string>)` and `solid_set_namespace(<namespace>, <solid_string>, <object>)`. You can get the global namespace by calling `solid_get_current_namespace(<vm>)`.
+ * Turn a C function with declaration `void <function>(solid_vm *vm)` into a callable solid object function with `solid_define_c_function(<function>)`. You can access arguments by popping the VM stack (you'll get them in reverse order) with `solid_pop_stack(<vm>)`, and return a value by setting `vm->regs[255]`.
 
 To put it all together, here's a complete example of embedding solid into a C program:
 
