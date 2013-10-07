@@ -19,6 +19,7 @@ typedef enum solid_type {
 	T_FUNC,
 	T_CFUNC,
 	T_NODE,
+	T_STRUCT, //Arbitrary C struct.
 } solid_type;
 
 typedef struct solid_object {
@@ -38,6 +39,7 @@ solid_object *solid_list(list_node *l);
 solid_object *solid_func();
 solid_object *solid_cfunc();
 solid_object *solid_node();
+solid_object *solid_struct(void *val);
 
 void solid_delete_object(solid_object *o);
 solid_object *solid_clone_object(solid_object *class);
@@ -45,5 +47,6 @@ solid_object *solid_clone_object(solid_object *class);
 int solid_get_int_value(solid_object *o);
 char *solid_get_str_value(solid_object *o);
 int solid_get_bool_value(solid_object *o);
+void *solid_get_struct_value(solid_object *o);
 
 #endif

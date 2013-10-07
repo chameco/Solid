@@ -1,13 +1,5 @@
 #include "object.h"
 
-solid_object *SOLID_CLASS_OBJECT;
-solid_object *SOLID_CLASS_INTEGER;
-solid_object *SOLID_CLASS_STRING;
-solid_object *SOLID_CLASS_BOOLEAN;
-solid_object *SOLID_CLASS_FUNC;
-solid_object *SOLID_CLASS_CFUNC;
-solid_object *SOLID_CLASS_NODE;
-
 void solid_set_namespace(solid_object *ns, solid_object *name, solid_object *o)
 {
 	if (ns->type != T_INSTANCE) {
@@ -129,6 +121,14 @@ solid_object *solid_node()
 	return ret;
 }
 
+solid_object *solid_struct(void *val)
+{
+	solid_object *ret = solid_make_object();
+	ret->type = T_STRUCT;
+	ret->data = val;
+	return ret;
+}
+
 void solid_delete_object(solid_object *o) //More than this is needed to truly delete an object,
 {                                   //possibly add a garbage collector in vm?
 	free(o);
@@ -171,5 +171,14 @@ int solid_get_bool_value(solid_object *o)
 		return *((int *) o->data);
 	}
 	log_err("Object not of boolean type");
+	exit(1);
+}
+
+void *solid_get_struct_value(solid_object *o)
+{
+	if (o->type == T_STRUCT) {
+		return o->data;
+	}
+	log_err("Object not of structure type");
 	exit(1);
 }
