@@ -11,5 +11,7 @@ typedef struct YYLTYPE
 } YYLTYPE;
 #define YYLTYPE_IS_DECLARED 1
 struct ast_node;
+
 int yyerror(struct YYLTYPE *yylloc_param, void *scanner, struct ast_node **root, const char *s);
+void report_error(char *string);
 #endif
