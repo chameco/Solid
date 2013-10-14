@@ -49,6 +49,7 @@ solid_object *solid_make_object()
 {
 	solid_object *ret = (solid_object *) malloc(sizeof(solid_object));
 	ret->type = T_NULL;
+	ret->data_size = 0;
 	ret->data = NULL;
 	return ret;
 }
@@ -57,6 +58,7 @@ solid_object *solid_instance()
 {
 	solid_object *ret = solid_make_object();
 	ret->type = T_INSTANCE;
+	ret->data_size = sizeof(hash_map);
 	ret->data = (void *) make_hash_map();
 	return ret;
 }
@@ -65,6 +67,7 @@ solid_object *solid_int(int val)
 {
 	solid_object *ret = solid_make_object();
 	ret->type = T_INT;
+	ret->data_size = sizeof(int);
 	ret->data = malloc(sizeof(int));
 	memcpy(ret->data, &val, sizeof(int));
 	return ret;
@@ -73,8 +76,10 @@ solid_object *solid_int(int val)
 solid_object *solid_str(char *val)
 {
 	solid_object *ret = solid_make_object();
+	size_t len = strlen(val) + sizeof(char); //Null byte at the end
 	ret->type = T_STR;
-	ret->data = malloc(strlen(val) + sizeof(char)); //Need the null byte
+	ret->data_size = len;
+	ret->data = malloc(len);
 	strcpy((char *) ret->data, val);
 	return ret;
 }
@@ -83,6 +88,7 @@ solid_object *solid_bool(int val)
 {
 	solid_object *ret = solid_make_object();
 	ret->type = T_BOOL;
+	ret->data_size = sizeof(int);
 	ret->data = malloc(sizeof(int));
 	int temp = (val != 0);
 	memcpy(ret->data, &temp, sizeof(int));
@@ -93,6 +99,7 @@ solid_object *solid_list(list_node *l)
 {
 	solid_object *ret = solid_make_object();
 	ret->type = T_LIST;
+	ret->data_size = sizeof(list_node);
 	ret->data = l;
 	return ret;
 }
@@ -101,6 +108,7 @@ solid_object *solid_func()
 {
 	solid_object *ret = solid_make_object();
 	ret->type = T_FUNC;
+	ret->data_size = 0;
 	ret->data = NULL;
 	return ret; //We don't do anything here: all bytecode will be added later
 }

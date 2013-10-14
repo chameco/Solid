@@ -139,7 +139,7 @@ int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 				pn(node->arg2);
 			}
 			break;
-		case RETURN:
+		case RET:
 			pn(node->arg1);
 			dbc(OP_END, 0, 0, NULL);
 			break;

@@ -24,6 +24,7 @@ typedef enum solid_type {
 
 typedef struct solid_object {
 	solid_type type;
+	size_t data_size;
 	void *data;
 } solid_object;
 
