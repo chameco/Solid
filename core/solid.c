@@ -21,6 +21,11 @@ solid_ast_node *solid_parse_expr(char *expr)
 solid_ast_node *solid_parse_file(char *path)
 {
 	FILE *f = fopen(path, "r");
+
+	if(f == NULL) {
+		return NULL;
+	}
+
 	char buffer[1024 * 1024] = {0};
 	fread(buffer, sizeof(char), 1024 * 1024, f);
 	fclose(f);
@@ -75,7 +80,13 @@ void solid_repl()
 int main(int argc, char *argv[])
 {
 	if (argc > 1) {
-		solid_object *mainfunc = solid_parse_tree(solid_parse_file(argv[1]));
+		solid_ast_node *tree = solid_parse_file(argv[1]);
+		if(tree == NULL) {
+			report_error(argv[1]);
+			exit(EXIT_FAILURE);
+		}
+
+		solid_object *mainfunc = solid_parse_tree(tree);
 		solid_vm *vm = solid_make_vm();
 		solid_set_namespace(solid_get_current_namespace(vm), solid_str("compile"), solid_define_c_function(solid_compile));
 		solid_set_namespace(solid_get_current_namespace(vm), solid_str("import"), solid_define_c_function(solid_import));
