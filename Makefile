@@ -1,4 +1,4 @@
-OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
+OBJECTS = core/linenoise/linenoise.o core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
 CFLAGS = -std=c99 -I/usr/local/include -I. -Icore -Wall -g -fPIC
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
@@ -10,13 +10,14 @@ datarootdir = $(prefix)/share
 datadir = $(datarootdir)
 libdir = $(exec_prefix)/lib
 includedir = $(prefix)/include
-all : deps parser $(OBJECTS)
-	$(CC) parser.o lexer.o $(OBJECTS) -ldl -lcuttle -g -Wall -Werror -o solid
-parser: core/parser.y core/parser.l
+all : deps parser.o lexer.o $(OBJECTS)
+	$(CC) parser.o lexer.o $(OBJECTS) -lreadline -ldl -lcuttle -g -Wall -Werror -o solid
+parser.o: core/parser.y
 	bison -d core/parser.y
+	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c parser.c -o parser.o -g
+lexer.o: core/parser.l
 	flex core/parser.l
 	$(CC) $(CFLAGS) -Wno-unneeded-internal-declaration -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g
-	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c parser.c -o parser.o -g
 tarball:
 	mkdir solid-$(VERSION)
 	cp -r Makefile parser core solid-$(VERSION)
@@ -37,9 +38,9 @@ install: all shared
 	$(INSTALL_DATA) core/vm.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/ast.h $(DESTDIR)$(includedir)/solid
 	$(INSTALL_DATA) core/object.h $(DESTDIR)$(includedir)/solid
-static: parser $(OBJECTS)
+static: parser.o lexer.o $(OBJECTS)
 	ar -cvq libsolid.a parser.o lexer.o $(OBJECTS)
-shared: parser $(OBJECTS)
+shared: parser.o lexer.o $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libsolid.so.1.0 -o libsolid.so.1.0 parser.o lexer.o $(OBJECTS)
 lib: lib/$(TARGET).o
 	$(CC) -shared -Wl,-soname,$(TARGET).so -lsolid -o $(TARGET).so lib/$(TARGET).o
