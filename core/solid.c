@@ -91,6 +91,9 @@ int main(int argc, char *argv[])
 		solid_set_namespace(solid_get_current_namespace(vm), solid_str("compile"), solid_define_c_function(solid_compile));
 		solid_set_namespace(solid_get_current_namespace(vm), solid_str("import"), solid_define_c_function(solid_import));
 		solid_call_func(vm, mainfunc);
+
+		/* [FIXME: Track down all the other 'allocs that need to be free'd] */
+		free(vm);
 	} else {
 		solid_repl();
 	}
