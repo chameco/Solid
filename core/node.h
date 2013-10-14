@@ -24,7 +24,7 @@ typedef enum solid_node_ins {
 	WHILE,
 	FN,
 	PARAM_LIST,
-	RETURN,
+	RET,
 	NS
 } solid_node_ins;
 

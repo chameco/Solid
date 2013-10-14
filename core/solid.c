@@ -1,4 +1,5 @@
 #include "solid.h"
+#include "linenoise/linenoise.h"
 
 int yyparse(solid_ast_node **expression, yyscan_t scanner);
 
@@ -64,16 +65,24 @@ void solid_import(solid_vm *vm)
 
 void solid_repl()
 {
-	size_t n = 256;
-	char *buffer = (char *) malloc(sizeof(char) * n);
+	char *input;
+	char *buffer;
 	solid_vm *vm = solid_make_vm();
 	solid_set_namespace(solid_get_current_namespace(vm), solid_str("compile"), solid_define_c_function(solid_compile));
 	solid_set_namespace(solid_get_current_namespace(vm), solid_str("import"), solid_define_c_function(solid_import));
-	while (printf("%s", "solid> "), getline(&buffer, &n, stdin) != -1) {
-		solid_object *curexpr = solid_parse_tree(solid_parse_expr(buffer));
-		solid_call_func(vm, curexpr);
-		solid_push_stack(vm, vm->regs[255]);
-		solid_print(vm);
+	while ((input = linenoise("solid> ")) != NULL) {
+		if (input[0] != '\0') {
+			buffer = calloc(strlen(input) + 1, sizeof(char));
+			strcpy(buffer, input);
+			buffer[strlen(input)] = '\n';
+			linenoiseHistoryAdd(input);
+			solid_object *curexpr = solid_parse_tree(solid_parse_expr(buffer));
+			free(buffer);
+			solid_call_func(vm, curexpr);
+			solid_push_stack(vm, vm->regs[255]);
+			solid_print(vm);
+		}
+		free(input);
 	}
 }
 

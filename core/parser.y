@@ -53,7 +53,7 @@ expr : constant {$$ = $1;}
      | TWHILE expr expr {$$ = solid_make_node(WHILE, $2, $3, solid_null_value());}
      | TFN param_list expr {$$ = solid_make_node(FN, $2, $3, solid_null_value());}
      | TNS expr {$$ = solid_make_node(NS, $2, NULL, solid_null_value());}
-     | TRETURN expr {$$ = solid_make_node(RETURN, $2, NULL, solid_null_value());}
+     | TRETURN expr {$$ = solid_make_node(RET, $2, NULL, solid_null_value());}
      ;
 
 constant : TSTRING {$$ = $1;}
