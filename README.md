@@ -8,11 +8,29 @@ Installation
 
 You'll want Bison (3.0.0), Flex (2.5), and a C compiler.
 
-The Makefile should automagically fetch other dependencies and stuff. Just do:
+The Makefile should automagically fetch other dependencies and stuff.
+
+To tell `make` where you want it to place the binary, you can set
+`INSTALL_DIR` to a directory. Likewise, changing `PREFIX_DIR` to a
+directory will modify where `make` places libs and header files.
+`PREFIX_DIR` should contain the sub-directories `/share`, `/lib`,
+and `/include`.
+
+If not defined, `PREFIX_DIR` and `INSTALL_DIR` will default to
+`/usr/local` and `PREFIX_DIR/bin`, respectively.
+
+After you've fiddled with your setup, you can just do this:
 
     git clone http://github.com/chameco/Solid
     cd Solid
-    make && sudo make install
+    make && sudo make INSTALL_DIR=/foo/bar install
+
+To uninstall, just run this from the source directory:
+
+    sudo make uninstall
+
+Making sure that if you changed `INSTALL_DIR`, you'll need to
+specify that again, for now.
 
 Usage
 ------
