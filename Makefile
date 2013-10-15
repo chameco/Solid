@@ -46,7 +46,7 @@ install: all shared
 static: parser.o lexer.o $(OBJECTS)
 	ar -cvq libsolid.a parser.o lexer.o $(OBJECTS)
 
-shared: parser lexer.o $(OBJECTS)
+shared: parser.o lexer.o $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libsolid.so.1.0 -o libsolid.so.1.0 parser.o lexer.o $(OBJECTS)
 
 lib: lib/$(TARGET).o
