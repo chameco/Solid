@@ -48,7 +48,14 @@ void solid_import(solid_vm *vm)
 	}
 	extension = dot + 1;
 	if (strcmp(extension, "sol") == 0) {
-		solid_object *func = solid_parse_tree(solid_parse_file(input));
+        solid_ast_node *tree = solid_parse_file(input);
+
+        if(tree == NULL) {
+            report_error("Attempted to parse nonexistent file (\"%s\")", input);
+            return;
+        }
+
+		solid_object *func = solid_parse_tree(tree);
 		solid_call_func(vm, func);
 	} else if (strcmp(extension, "so") == 0) {
 		void *handle = dlopen(input, RTLD_LAZY);
@@ -91,7 +98,7 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		solid_ast_node *tree = solid_parse_file(argv[1]);
 		if(tree == NULL) {
-			report_error(argv[1]);
+			report_error("'%s'", argv[1]);
 			exit(EXIT_FAILURE);
 		}
 
