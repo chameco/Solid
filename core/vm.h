@@ -1,13 +1,10 @@
 #ifndef SOLID_VM_H
 #define SOLID_VM_H
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
+typedef struct solid_vm solid_vm;
 
 #include "object.h"
+#include <cuttle/utils.h>
 
 typedef enum solid_ins {
 	OP_END,
@@ -46,12 +43,13 @@ typedef struct solid_function {
 	solid_object *closure;
 } solid_function;
 
-typedef struct solid_vm {
+struct solid_vm {
 	list_node *stack;
+	list_node *all_objects;
 	solid_object *regs[256];
 	solid_object *namespace_stack[256];
 	int namespace_stack_pointer;
-} solid_vm;
+};
 
 solid_vm *solid_make_vm();
 
@@ -69,8 +67,11 @@ solid_object *solid_pop_predefined_namespace(solid_vm *vm);
 
 solid_object *solid_get_current_namespace(solid_vm *vm);
 
-solid_object *solid_define_function(solid_bytecode *inslist, solid_object *closure);
-solid_object *solid_define_c_function(void (*function)(solid_vm *vm));
+void solid_gc_add_object(solid_vm *vm, solid_object *o);
+void solid_gc(solid_vm *vm);
+
+solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid_object *closure);
+solid_object *solid_define_c_function(solid_vm *vm, void (*function)(solid_vm *vm));
 
 void solid_nth_list(solid_vm *vm);
 void solid_print(solid_vm *vm);
@@ -86,7 +87,7 @@ void solid_lte(solid_vm *vm);
 void solid_gt(solid_vm *vm);
 void solid_gte(solid_vm *vm);
 
-solid_object *solid_not(solid_object *o);
+solid_object *solid_not(solid_vm *vm, solid_object *o);
 
 solid_bytecode solid_bc(solid_ins i, int a, int b, void *meta);
 

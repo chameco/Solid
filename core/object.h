@@ -2,12 +2,11 @@
 #define SOLID_OBJECT_H
 
 #include <stdlib.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <cuttle/utils.h>
-#include <cuttle/debug.h>
 
-struct solid_object;
+typedef struct solid_object solid_object;
+
+#include "vm.h"
 
 typedef enum solid_type {
 	T_NULL, //Throw an error when detected.
@@ -22,28 +21,35 @@ typedef enum solid_type {
 	T_STRUCT, //Arbitrary C struct.
 } solid_type;
 
-typedef struct solid_object {
+struct solid_object {
 	solid_type type;
+	unsigned char marked;
 	size_t data_size;
 	void *data;
-} solid_object;
+};
 
 void solid_set_namespace(solid_object *ns, solid_object *name, solid_object *o);
 solid_object *solid_get_namespace(solid_object *ns, solid_object *name);
 int solid_namespace_has(solid_object *ns, solid_object *name);
-solid_object *solid_make_object();
-solid_object *solid_instance();
-solid_object *solid_int(int val);
-solid_object *solid_str(char *val);
-solid_object *solid_bool(int val);
-solid_object *solid_list(list_node *l);
-solid_object *solid_func();
-solid_object *solid_cfunc();
-solid_object *solid_node();
-solid_object *solid_struct(void *val);
+solid_object *solid_make_object(solid_vm *vm);
+solid_object *solid_instance(solid_vm *vm);
+solid_object *solid_int(solid_vm *vm, int val);
+solid_object *solid_str(solid_vm *vm, char *val);
+solid_object *solid_bool(solid_vm *vm, int val);
+solid_object *solid_list(solid_vm *vm, list_node *l);
+solid_object *solid_func(solid_vm *vm);
+solid_object *solid_cfunc(solid_vm *vm);
+solid_object *solid_node(solid_vm *vm);
+solid_object *solid_struct(solid_vm *vm, void *val);
 
-void solid_delete_object(solid_object *o);
-solid_object *solid_clone_object(solid_object *class);
+void solid_mark_object(solid_object *o);
+void solid_mark_list(list_node *l);
+void solid_mark_hash(hash_map *l);
+
+void solid_delete_object(solid_vm *vm, solid_object *o);
+void solid_delete_list(solid_vm *vm, list_node *l);
+void solid_delete_hash(solid_vm *vm, hash_map *l);
+solid_object *solid_clone_object(solid_vm *vm, solid_object *class);
 
 int solid_get_int_value(solid_object *o);
 char *solid_get_str_value(solid_object *o);

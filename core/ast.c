@@ -1,17 +1,27 @@
 #include "ast.h"
 
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
+
+#include "node.h"
+#include "vm.h"
+#include "object.h"
+
 #define dbc(I, A, B, M) bcode[i++] = solid_bc(I, A, B, M)
 #define pn(N) i = solid_parse_node(N, bcode, i)
 #define fdbc(I, A, B, M) function_bcode[fi++] = solid_bc(I, A, B, M)
 #define fpn(N) fi = solid_parse_node(N, function_bcode, fi)
 
-solid_object *solid_parse_tree(solid_ast_node *tree)
+solid_object *solid_parse_tree(solid_vm *vm, solid_ast_node *tree)
 {
 	solid_bytecode *bcode = (solid_bytecode *) malloc(
 			sizeof(solid_bytecode) * 1024);
 	int i = solid_parse_node(tree, bcode, 0);
 	dbc(OP_END, 0, 0, NULL);
-	return solid_define_function(bcode, NULL);
+	return solid_define_function(vm, bcode, NULL);
 }
 int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 {

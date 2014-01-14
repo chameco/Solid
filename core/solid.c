@@ -35,7 +35,7 @@ solid_ast_node *solid_parse_file(char *path)
 
 void solid_compile(solid_vm *vm)
 {
-	vm->regs[255] = solid_parse_tree(solid_parse_expr(solid_get_str_value(solid_pop_stack(vm))));
+	vm->regs[255] = solid_parse_tree(vm, solid_parse_expr(solid_get_str_value(solid_pop_stack(vm))));
 }
 
 void solid_import(solid_vm *vm)
@@ -48,7 +48,7 @@ void solid_import(solid_vm *vm)
 	}
 	extension = dot + 1;
 	if (strcmp(extension, "sol") == 0) {
-		solid_object *func = solid_parse_tree(solid_parse_file(input));
+		solid_object *func = solid_parse_tree(vm, solid_parse_file(input));
 		solid_call_func(vm, func);
 	} else if (strcmp(extension, "so") == 0) {
 		void *handle = dlopen(input, RTLD_LAZY);
@@ -68,21 +68,21 @@ void solid_repl()
 	char *input;
 	char *buffer;
 	solid_vm *vm = solid_make_vm();
-	solid_set_namespace(solid_get_current_namespace(vm), solid_str("compile"), solid_define_c_function(solid_compile));
-	solid_set_namespace(solid_get_current_namespace(vm), solid_str("import"), solid_define_c_function(solid_import));
+	solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "compile"), solid_define_c_function(vm, solid_compile));
+	solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "import"), solid_define_c_function(vm, solid_import));
 	while ((input = linenoise("solid> ")) != NULL) {
 		if (input[0] != '\0') {
 			buffer = calloc(strlen(input) + 1, sizeof(char));
 			strcpy(buffer, input);
 			buffer[strlen(input)] = '\n';
 			linenoiseHistoryAdd(input);
-			solid_object *curexpr = solid_parse_tree(solid_parse_expr(buffer));
-			free(buffer);
+			solid_object *curexpr = solid_parse_tree(vm, solid_parse_expr(buffer));
+			//free(buffer);
 			solid_call_func(vm, curexpr);
 			solid_push_stack(vm, vm->regs[255]);
 			solid_print(vm);
 		}
-		free(input);
+		//free(input);
 	}
 }
 
@@ -95,14 +95,14 @@ int main(int argc, char *argv[])
 			exit(EXIT_FAILURE);
 		}
 
-		solid_object *mainfunc = solid_parse_tree(tree);
 		solid_vm *vm = solid_make_vm();
-		solid_set_namespace(solid_get_current_namespace(vm), solid_str("compile"), solid_define_c_function(solid_compile));
-		solid_set_namespace(solid_get_current_namespace(vm), solid_str("import"), solid_define_c_function(solid_import));
+		solid_object *mainfunc = solid_parse_tree(vm, tree);
+		solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "compile"), solid_define_c_function(vm, solid_compile));
+		solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "import"), solid_define_c_function(vm, solid_import));
 		solid_call_func(vm, mainfunc);
 
 		/* [FIXME: Track down all the other 'allocs that need to be free'd] */
-		free(vm);
+		//free(vm);
 	} else {
 		solid_repl();
 	}

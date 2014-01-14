@@ -11,7 +11,7 @@ libdir = $(PREFIX_DIR)/lib
 includedir = $(PREFIX_DIR)/include
 
 all : deps parser.o lexer.o $(OBJECTS)
-	$(CC) parser.o lexer.o $(OBJECTS) -ldl -lcuttle -g -Wall -Werror -o solid
+	$(CC) parser.o lexer.o $(OBJECTS) -lcuttle -ldl -g -Wall -Werror -o solid
 	
 parser.o: core/parser.y
 	bison -d core/parser.y

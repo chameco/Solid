@@ -1,10 +1,5 @@
 #ifndef SOLID_NODE_H
 #define SOLID_NODE_H
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
 
 typedef enum solid_node_ins {
 	STATEMENT_LIST,

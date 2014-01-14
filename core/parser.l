@@ -2,6 +2,8 @@
 #include "scanner_state.h"
 #include "node.h"
 #include <stdio.h>
+#include <stddef.h>
+#include <cuttle/debug.h>
 
 #include "parser.h"  /* This is where it gets the definition for yylloc from */
 #define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;

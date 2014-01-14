@@ -1,26 +1,36 @@
 #include "vm.h"
 
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
+
+#include "object.h"
+
 solid_vm *solid_make_vm()
 {
 	solid_vm *ret = (solid_vm *) malloc(sizeof(solid_vm));
 	ret->stack = make_list();
+	ret->all_objects = make_list();
 	memset(ret->regs, 0, 256);
 	memset(ret->namespace_stack, 0, 256);
-	ret->namespace_stack[0] = solid_instance();
+	ret->namespace_stack[0] = solid_instance(ret);
 	ret->namespace_stack_pointer = 0;
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("!!"), solid_define_c_function(solid_nth_list));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("print"), solid_define_c_function(solid_print));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("clone"), solid_define_c_function(solid_clone));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str(":"), solid_define_c_function(solid_cons));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("+"), solid_define_c_function(solid_add));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("-"), solid_define_c_function(solid_sub));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("*"), solid_define_c_function(solid_mul));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("/"), solid_define_c_function(solid_div));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("=="), solid_define_c_function(solid_eq));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("<"), solid_define_c_function(solid_lt));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str("<="), solid_define_c_function(solid_lte));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str(">"), solid_define_c_function(solid_gt));
-	solid_set_namespace(solid_get_current_namespace(ret), solid_str(">="), solid_define_c_function(solid_gte));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "!!"), solid_define_c_function(ret, solid_nth_list));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "print"), solid_define_c_function(ret, solid_print));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "clone"), solid_define_c_function(ret, solid_clone));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, ":"), solid_define_c_function(ret, solid_cons));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "+"), solid_define_c_function(ret, solid_add));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "-"), solid_define_c_function(ret, solid_sub));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "*"), solid_define_c_function(ret, solid_mul));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "/"), solid_define_c_function(ret, solid_div));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "=="), solid_define_c_function(ret, solid_eq));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "<"), solid_define_c_function(ret, solid_lt));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "<="), solid_define_c_function(ret, solid_lte));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, ">"), solid_define_c_function(ret, solid_gt));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, ">="), solid_define_c_function(ret, solid_gte));
+	solid_set_namespace(solid_get_current_namespace(ret), solid_str(ret, "gc"), solid_define_c_function(ret, solid_gc));
 	return ret;
 }
 
@@ -66,13 +76,13 @@ solid_object *solid_pop_list(solid_object *list)
 
 void solid_push_namespace(solid_vm *vm)
 {
-	vm->namespace_stack[vm->namespace_stack_pointer+1] = solid_clone_object(vm->namespace_stack[vm->namespace_stack_pointer]);
+	vm->namespace_stack[vm->namespace_stack_pointer+1] = solid_clone_object(vm, vm->namespace_stack[vm->namespace_stack_pointer]);
 	vm->namespace_stack_pointer++;
 }
 
 void solid_pop_namespace(solid_vm *vm)
 {
-	free(vm->namespace_stack[vm->namespace_stack_pointer--]);
+	//free(vm->namespace_stack[vm->namespace_stack_pointer--]);
 }
 
 void solid_push_predefined_namespace(solid_vm *vm, solid_object *namespace)
@@ -90,22 +100,51 @@ solid_object *solid_get_current_namespace(solid_vm *vm)
 	return vm->namespace_stack[vm->namespace_stack_pointer];
 }
 
-solid_object *solid_define_function(solid_bytecode *inslist, solid_object *closure)
+void solid_gc_add_object(solid_vm *vm, solid_object *o)
 {
-	solid_object *ret = solid_func();
+	insert_list(vm->all_objects, (void *) o);
+}
+
+void solid_gc(solid_vm *vm)
+{
+	for (int i = vm->namespace_stack_pointer; i >= 0; i--) {
+		solid_mark_object(vm->namespace_stack[i]);
+	}
+
+	list_node *c;
+	solid_object *cur;
+	for (c = vm->all_objects->next; c != NULL; c = c->next) {
+		if (c->data != NULL) {
+			cur = (solid_object *) c->data;
+			if (cur->marked == 0) {
+				solid_delete_object(vm, cur);
+				list_node *prev = c->prev;
+				c->prev->next = c->next;
+				c->next->prev = c->prev;
+				free(c);
+				c = prev;
+			}
+		}
+	}
+	vm->regs[255] = solid_str(vm, "Trash compactor completing operation");
+}
+
+solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid_object *closure)
+{
+	solid_object *ret = solid_func(vm);
 	solid_function *fval = (solid_function *) malloc(sizeof(solid_function));
 	fval->bcode = inslist;
 	fval->closure = closure;
 	ret->data = (void *) fval;
 	if (fval->closure != NULL) {
-		solid_set_namespace(fval->closure, solid_str("this"), ret);
+		solid_set_namespace(fval->closure, solid_str(vm, "this"), ret);
 	}
 	return ret;
 }
 
-solid_object *solid_define_c_function(void (*function)(solid_vm *vm))
+solid_object *solid_define_c_function(solid_vm *vm, void (*function)(solid_vm *vm))
 {
-	solid_object *ret = solid_cfunc();
+	solid_object *ret = solid_cfunc(vm);
 	ret->data = (void *) function;
 	return ret;
 }
@@ -151,7 +190,7 @@ void solid_print(solid_vm *vm)
 void solid_clone(solid_vm *vm)
 {
 	solid_object *ns = solid_pop_stack(vm);
-	vm->regs[255] = solid_clone_object(ns);
+	vm->regs[255] = solid_clone_object(vm, ns);
 }
 
 void solid_cons(solid_vm *vm)
@@ -162,7 +201,7 @@ void solid_cons(solid_vm *vm)
 	insert_list(ret, (void *) elem);
 	ret->next->next = (list_node *) list->data;
 	((list_node *) list->data)->prev = ret->next;
-	vm->regs[255] = solid_list(ret);
+	vm->regs[255] = solid_list(vm, ret);
 }
 
 void solid_add(solid_vm *vm)
@@ -173,7 +212,7 @@ void solid_add(solid_vm *vm)
 		log_err("Attempt to apply operator \"+\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(solid_get_int_value(a) + solid_get_int_value(b));
+	vm->regs[255] = solid_int(vm, solid_get_int_value(a) + solid_get_int_value(b));
 }
 
 void solid_sub(solid_vm *vm)
@@ -184,7 +223,7 @@ void solid_sub(solid_vm *vm)
 		log_err("Attempt to apply operator \"-\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(solid_get_int_value(a) - solid_get_int_value(b));
+	vm->regs[255] = solid_int(vm, solid_get_int_value(a) - solid_get_int_value(b));
 }
 
 void solid_mul(solid_vm *vm)
@@ -195,7 +234,7 @@ void solid_mul(solid_vm *vm)
 		log_err("Attempt to apply operator \"*\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(solid_get_int_value(a) * solid_get_int_value(b));
+	vm->regs[255] = solid_int(vm, solid_get_int_value(a) * solid_get_int_value(b));
 }
 
 void solid_div(solid_vm *vm)
@@ -206,7 +245,7 @@ void solid_div(solid_vm *vm)
 		log_err("Attempt to apply operator \"\\\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(solid_get_int_value(a) / solid_get_int_value(b));
+	vm->regs[255] = solid_int(vm, solid_get_int_value(a) / solid_get_int_value(b));
 }
 
 void solid_eq(solid_vm *vm)
@@ -217,7 +256,7 @@ void solid_eq(solid_vm *vm)
 		log_err("Attempt to apply operator \"==\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(solid_get_int_value(a) == solid_get_int_value(b));
+	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) == solid_get_int_value(b));
 }
 
 void solid_lt(solid_vm *vm)
@@ -228,7 +267,7 @@ void solid_lt(solid_vm *vm)
 		log_err("Attempt to apply operator \"<\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(solid_get_int_value(a) < solid_get_int_value(b));
+	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) < solid_get_int_value(b));
 }
 
 void solid_lte(solid_vm *vm)
@@ -239,7 +278,7 @@ void solid_lte(solid_vm *vm)
 		log_err("Attempt to apply operator \"<=\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(solid_get_int_value(a) <= solid_get_int_value(b));
+	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) <= solid_get_int_value(b));
 }
 
 void solid_gt(solid_vm *vm)
@@ -250,7 +289,7 @@ void solid_gt(solid_vm *vm)
 		log_err("Attempt to apply operator \">\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(solid_get_int_value(a) > solid_get_int_value(b));
+	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) > solid_get_int_value(b));
 }
 
 void solid_gte(solid_vm *vm)
@@ -261,16 +300,16 @@ void solid_gte(solid_vm *vm)
 		log_err("Attempt to apply operator \">=\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(solid_get_int_value(a) >= solid_get_int_value(b));
+	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) >= solid_get_int_value(b));
 }
 
-solid_object *solid_not(solid_object *o)
+solid_object *solid_not(solid_vm *vm, solid_object *o)
 {
 	if (o->type != T_BOOL && o->type != T_INT) {
 		log_err("Attempt to negate invalid type");
 		exit(1);
 	}
-	return solid_bool(!solid_get_bool_value(o));
+	return solid_bool(vm, !solid_get_bool_value(o));
 }
 
 solid_bytecode solid_bc(solid_ins i, int a, int b, void *meta)
@@ -310,19 +349,19 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					vm->regs[cur.a] = solid_get_namespace(vm->regs[cur.b], vm->regs[cur.a]);
 					break;
 				case OP_SET:
-					solid_set_namespace(vm->regs[cur.b], solid_str((char *) cur.meta), vm->regs[cur.a]);
+					solid_set_namespace(vm->regs[cur.b], solid_str(vm, (char *) cur.meta), vm->regs[cur.a]);
 					break;
 				case OP_STOREINT:
-					vm->regs[cur.a] = solid_int(cur.b);
+					vm->regs[cur.a] = solid_int(vm, cur.b);
 					break;
 				case OP_STORESTR:
-					vm->regs[cur.a] = solid_str((char *) cur.meta);
+					vm->regs[cur.a] = solid_str(vm, (char *) cur.meta);
 					break;
 				case OP_STOREBOOL:
-					vm->regs[cur.a] = solid_bool(cur.b);
+					vm->regs[cur.a] = solid_bool(vm, cur.b);
 					break;
 				case OP_STORELIST:
-					vm->regs[cur.a] = solid_list(make_list());
+					vm->regs[cur.a] = solid_list(vm, make_list());
 					break;
 				case OP_PUSHLIST:
 					solid_push_list(vm->regs[cur.a], vm->regs[cur.b]);
@@ -340,10 +379,10 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					vm->regs[cur.a] = solid_get_current_namespace(vm);
 					break;
 				case OP_FN:
-					vm->regs[cur.a] = solid_define_function((solid_bytecode *) cur.meta, solid_clone_object(solid_get_current_namespace(vm)));
+					vm->regs[cur.a] = solid_define_function(vm, (solid_bytecode *) cur.meta, solid_clone_object(vm, solid_get_current_namespace(vm)));
 					break;
 				case OP_NS:
-					vm->regs[cur.a] = solid_clone_object(solid_get_current_namespace(vm));
+					vm->regs[cur.a] = solid_clone_object(vm, solid_get_current_namespace(vm));
 					solid_push_predefined_namespace(vm, vm->regs[cur.a]);
 					break;
 				case OP_ENDNS:
@@ -361,7 +400,7 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					solid_call_func(vm, vm->regs[cur.a]);
 					break;
 				case OP_NOT:
-					vm->regs[cur.a] = solid_not(vm->regs[cur.a]);
+					vm->regs[cur.a] = solid_not(vm, vm->regs[cur.a]);
 					break;
 			}
 		}

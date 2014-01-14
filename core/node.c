@@ -1,5 +1,11 @@
 #include "node.h"
 
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <cuttle/utils.h>
+#include <cuttle/debug.h>
+
 solid_node_val NULL_VALUE = {0};
 
 solid_node_val solid_null_value()

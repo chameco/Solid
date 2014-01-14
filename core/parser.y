@@ -1,6 +1,7 @@
 %{
 #define YYERROR_VERBOSE 1
 #include "node.h"
+#include <stddef.h>
 %}
 
 %output "parser.c"
