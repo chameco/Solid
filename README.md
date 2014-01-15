@@ -6,7 +6,7 @@ Solid is a simple, elegant language with a super simple C API. Yes, that means y
 Installation
 -------------
 
-You'll want Bison (3.0.0), Flex (2.5), and a C compiler.
+You'll want Bison (3.0.0), Flex (2.5), and a C compiler (Clang and GCC are tested, because that's what I use, but everything is standard POSIX C99).
 
 The Makefile should automagically fetch other dependencies and stuff.
 
@@ -134,9 +134,9 @@ Now this is where it gets interesting. Solid exposes a complete C API that allow
  * Make a virtual machine with `solid_make_vm()`. Example: `solid_vm *vm = solid_make_vm();`
  * Run code on a VM. Example: `solid_call_func(vm, func);`
  * Any expression you evaluate in solid puts the result in the return register, accesible at `vm->regs[255]`. However, this value will be of type `solid_object *`. To convert to C types, use `solid_get_str_value(<object>)`, `solid_get_int_value(<object>)`, and `solid_get_bool_value(<object>)`.
- * Convert C primitives to solid objects with `solid_str(<string>)`, `solid_int(<integer>)`, and `solid_bool(<integer>)`.
- * Use namespaces with `solid_get_namespace(<namespace>, <solid_string>)` and `solid_set_namespace(<namespace>, <solid_string>, <object>)`. You can get the global namespace by calling `solid_get_current_namespace(<vm>)`.
- * Turn a C function with declaration `void <function>(solid_vm *vm)` into a callable solid object function with `solid_define_c_function(<function>)`. You can access arguments by popping the VM stack (you'll get them in reverse order) with `solid_pop_stack(<vm>)`, and return a value by setting `vm->regs[255]`.
+ * Convert C primitives to solid objects with `solid_str(vm, <string>)`, `solid_int(vm, <integer>)`, and `solid_bool(vm, <integer>)`.
+ * Use namespaces with `solid_get_namespace(<namespace>, <solid_string>)` and `solid_set_namespace(<namespace>, <solid_string>, <object>)`. You can get the global namespace by calling `solid_get_current_namespace(vm)`.
+ * Turn a C function with declaration `void <function>(solid_vm *vm)` into a callable solid object function with `solid_define_c_function(vm, <function>)`. You can access arguments by popping the VM stack (you'll get them in reverse order) with `solid_pop_stack(vm)`, and return a value by setting `vm->regs[255]`.
 
 To put it all together, here's a complete example of embedding solid into a C program:
 
