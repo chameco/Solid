@@ -1,11 +1,7 @@
-import("Math.sol")
-
-^ = Math.^
-
-print(10 ^ 2)
+import("_math.so")
 
 x = [10, 20, 30]
 
-first = fn list list !! 1
+first = fn list list !! 0
 
-print(first(x))
+print(plus(first(x), 1))

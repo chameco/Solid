@@ -58,6 +58,10 @@ deps:
 
 uninstall:
 	rm $(INSTALL_DIR)/solid
+	rm $(includedir)/solid -r
+	rm $(libdir)/libsolid.so
+	rm $(libdir)/libsolid.so.1
+	rm $(libdir)/libsolid.so.1.0
 
 clean:
 	rm -f parser.c parser.h lexer.c lexer.h

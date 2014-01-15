@@ -51,10 +51,15 @@ void solid_import(solid_vm *vm)
 		solid_object *func = solid_parse_tree(vm, solid_parse_file(input));
 		solid_call_func(vm, func);
 	} else if (strcmp(extension, "so") == 0) {
-		void *handle = dlopen(input, RTLD_LAZY);
+		char buffer[256];
+		getcwd(buffer, 256);
+		strcat(buffer, "/");
+		strcat(buffer, input);
+		void *handle = dlopen(buffer, RTLD_LAZY);
 		void (*init)(solid_vm *);
 		if (handle == NULL) {
 			log_err("Loading external library %s failed with error %s", input, dlerror());
+			exit(1);
 		}
 		dlerror();
 		*(void **) (&init) = dlsym(handle, "solid_init");

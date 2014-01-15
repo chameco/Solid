@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <unistd.h>
 #include <cuttle/utils.h>
 #include <cuttle/debug.h>
 
