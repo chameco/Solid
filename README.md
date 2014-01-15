@@ -147,13 +147,13 @@ To put it all together, here's a complete example of embedding solid into a C pr
     {
         solid_object *argument = solid_pop_stack(vm);
         printf("Howdy, %s!\n", solid_get_str_value(argument));
-        vm->regs[255] = solid_int(1336)
+        vm->regs[255] = solid_int(vm, 1336)
     }
     int main()
     {
         solid_vm *vm = solid_make_vm();
         solid_object *compiled_expr = solid_parse_tree(solid_parse_expr("1 + my_function()"));
-        solid_set_namespace(solid_get_current_namespace(vm), solid_str("my_function"), solid_define_cfunc(hello_world));
+        solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "my_function"), solid_define_cfunc(vm, hello_world));
         solid_call_func(vm, compiled_expr);
         printf("solid is super %d", solid_get_int_value(vm->regs[255]));
     }
