@@ -87,6 +87,9 @@ int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 		case CONST_INT:
 			dbc(OP_STOREINT, 255, node->val.ival, NULL);
 			break;
+		case CONST_DOUBLE:
+			dbc(OP_STOREDOUBLE, 255, 0, &(node->val.dval));
+			break;
 		case CONST_STR:
 			dbc(OP_STORESTR, 255, 0, node->val.strval);
 			break;

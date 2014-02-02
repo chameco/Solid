@@ -50,7 +50,7 @@ shared: parser.o lexer.o $(OBJECTS)
 	$(CC) -shared -Wl,-soname,libsolid.so.1.0 -o libsolid.so.1.0 parser.o lexer.o $(OBJECTS)
 
 lib: lib/$(TARGET).o
-	$(CC) -shared -Wl,-soname,$(TARGET).so -lsolid -o $(TARGET).so lib/$(TARGET).o
+	$(CC) -shared -Wl,-soname,$(TARGET).so -lsolid -lm -o lib/$(TARGET).so lib/$(TARGET).o
 
 deps:
 	mkdir -p deps

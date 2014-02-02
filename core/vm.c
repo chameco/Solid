@@ -175,6 +175,8 @@ void solid_print(solid_vm *vm)
 	solid_object *in = solid_pop_stack(vm);
 	if (in->type == T_INT) {
 		fprintf(stdout, "%d\n", solid_get_int_value(in));
+	} else if (in->type == T_DOUBLE) {
+		fprintf(stdout, "%lf\n", solid_get_double_value(in));
 	} else if (in->type == T_STR) {
 		fprintf(stdout, "%s\n", solid_get_str_value(in));
 	} else if (in->type == T_FUNC) {
@@ -208,44 +210,60 @@ void solid_add(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"+\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(vm, solid_get_int_value(a) + solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) + solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) + solid_get_int_value(b));
+	}
 }
 
 void solid_sub(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"-\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(vm, solid_get_int_value(a) - solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) - solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) - solid_get_int_value(b));
+	}
 }
 
 void solid_mul(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"*\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(vm, solid_get_int_value(a) * solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) * solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) * solid_get_int_value(b));
+	}
 }
 
 void solid_div(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"\\\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_int(vm, solid_get_int_value(a) / solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) / solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) / solid_get_int_value(b));
+	}
 }
 
 void solid_eq(solid_vm *vm)
@@ -263,44 +281,60 @@ void solid_lt(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"<\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) < solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) < solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) < solid_get_int_value(b));
+	}
 }
 
 void solid_lte(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \"<=\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) <= solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) <= solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) <= solid_get_int_value(b));
+	}
 }
 
 void solid_gt(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \">\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) > solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) > solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) > solid_get_int_value(b));
+	}
 }
 
 void solid_gte(solid_vm *vm)
 {
 	solid_object *b = solid_pop_stack(vm);
 	solid_object *a = solid_pop_stack(vm);
-	if (a->type != T_INT || b->type != T_INT) {
+	if ((a->type != T_INT && a->type != T_DOUBLE) || (b->type != T_INT && b->type != T_DOUBLE)) {
 		log_err("Attempt to apply operator \">=\" on invalid types");
 		exit(1);
 	}
-	vm->regs[255] = solid_bool(vm, solid_get_int_value(a) >= solid_get_int_value(b));
+	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
+		vm->regs[255] = solid_double(vm, solid_get_double_value(a) >= solid_get_double_value(b));
+	} else {
+		vm->regs[255] = solid_int(vm, solid_get_int_value(a) >= solid_get_int_value(b));
+	}
 }
 
 solid_object *solid_not(solid_vm *vm, solid_object *o)
@@ -353,6 +387,9 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 				case OP_STOREINT:
 					vm->regs[cur.a] = solid_int(vm, cur.b);
+					break;
+				case OP_STOREDOUBLE:
+					vm->regs[cur.a] = solid_double(vm, *((double *) cur.meta));
 					break;
 				case OP_STORESTR:
 					vm->regs[cur.a] = solid_str(vm, (char *) cur.meta);

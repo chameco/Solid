@@ -80,6 +80,16 @@ solid_object *solid_int(solid_vm *vm, int val)
 	return ret;
 }
 
+solid_object *solid_double(solid_vm *vm, double val)
+{
+	solid_object *ret = solid_make_object(vm);
+	ret->type = T_DOUBLE;
+	ret->data_size = sizeof(double);
+	ret->data = malloc(sizeof(double));
+	memcpy(ret->data, &val, sizeof(double));
+	return ret;
+}
+
 solid_object *solid_str(solid_vm *vm, char *val)
 {
 	solid_object *ret = solid_make_object(vm);
@@ -212,6 +222,7 @@ void solid_delete_object(solid_vm *vm, solid_object *o)
 			solid_delete_list(vm, (list_node *) o->data);
 			break;
 		case T_INT:
+		case T_DOUBLE:
 		case T_STR:
 		case T_BOOL:
 		case T_FUNC:
@@ -276,6 +287,17 @@ int solid_get_int_value(solid_object *o)
 		return *((int *) o->data);
 	}
 	log_err("Object not of integral type");
+	exit(1);
+}
+
+double solid_get_double_value(solid_object *o)
+{
+	if (o->type == T_DOUBLE) {
+		return *((double *) o->data);
+	} else if (o->type == T_INT) {
+		return (double) *((int *) o->data);
+	}
+	log_err("Object not of numeric type");
 	exit(1);
 }
 

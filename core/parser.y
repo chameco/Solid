@@ -13,7 +13,7 @@
 %parse-param {solid_ast_node **root}
 %parse-param {void *scanner}
 
-%token <node> TIDENTIFIER TINLINE_IDENTIFIER TSTRING TINTEGER
+%token <node> TIDENTIFIER TINLINE_IDENTIFIER TSTRING TINTEGER TDOUBLE
 %token <token> TTRUE TFALSE
 
 %token <token> TSEMICOLON TNEWLINE;
@@ -59,6 +59,7 @@ expr : constant {$$ = $1;}
 
 constant : TSTRING {$$ = $1;}
 	 | TINTEGER {$$ = $1;}
+	 | TDOUBLE {$$ = $1;}
 	 | TTRUE {$$ = solid_const_bool_node(1);}
 	 | TFALSE {$$ = solid_const_bool_node(0);}
 	 | TLSQUARE list_items TRSQUARE {$$ = solid_make_node(CONST_LIST, $2, NULL, solid_null_value());}

@@ -20,6 +20,13 @@ solid_node_val solid_int_value(int i)
 	return r;
 }
 
+solid_node_val solid_double_value(double d)
+{
+	solid_node_val r;
+	r.dval = d;
+	return r;
+}
+
 solid_node_val solid_str_value(char *s)
 {
 	solid_node_val r;
@@ -47,6 +54,11 @@ solid_ast_node *solid_make_node(solid_node_ins ins, solid_ast_node *arg1, solid_
 solid_ast_node *solid_const_integer_node(int i)
 {
 	return solid_make_node(CONST_INT, NULL, NULL, solid_int_value(i));
+}
+
+solid_ast_node *solid_const_double_node(double d)
+{
+	return solid_make_node(CONST_DOUBLE, NULL, NULL, solid_double_value(d));
 }
 
 solid_ast_node *solid_const_string_node(char *s)

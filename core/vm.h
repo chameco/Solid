@@ -14,6 +14,7 @@ typedef enum solid_ins {
 	OP_GET,
 	OP_SET,
 	OP_STOREINT,
+	OP_STOREDOUBLE,
 	OP_STORESTR,
 	OP_STOREBOOL,
 	OP_STORELIST,
