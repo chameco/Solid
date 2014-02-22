@@ -319,6 +319,15 @@ int solid_get_bool_value(solid_object *o)
 	exit(1);
 }
 
+list_node *solid_get_list_value(solid_object *o)
+{
+	if (o->type == T_LIST) {
+		return (list_node *) o->data;
+	}
+	log_err("Object not of list type");
+	exit(1);
+}
+
 void *solid_get_struct_value(solid_object *o)
 {
 	if (o->type == T_STRUCT) {

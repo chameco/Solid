@@ -57,6 +57,7 @@ int solid_get_int_value(solid_object *o);
 double solid_get_double_value(solid_object *o);
 char *solid_get_str_value(solid_object *o);
 int solid_get_bool_value(solid_object *o);
+list_node *solid_get_list_value(solid_object *o);
 void *solid_get_struct_value(solid_object *o);
 
 #endif
