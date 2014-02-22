@@ -46,8 +46,8 @@ int f(int token, yyscan_t scanner);
 (-|[+*/<>=^&%:!])*      {yylval->node = solid_identifier_node(yytext); int temp = f(TINLINE_IDENTIFIER, yyscanner); if (temp) return temp;}
 [a-zA-Z_][a-zA-Z0-9_]*  {yylval->node = solid_identifier_node(yytext); int temp = f(TIDENTIFIER, yyscanner); if (temp) return temp;}
 \"([^\\\"]|\\.)*\"      {yytext[strlen(yytext) - 1] = '\0'; yylval->node = solid_const_string_node(yytext+1); int temp = f(TSTRING, yyscanner); if (temp) return temp;}
-[0-9]+                  {yylval->node = solid_const_integer_node(atoi(yytext)); int temp = f(TINTEGER, yyscanner); if (temp) return temp;}
-[0-9]+\.[0-9]+          {yylval->node = solid_const_double_node(atof(yytext)); int temp = f(TDOUBLE, yyscanner); if (temp) return temp;}
+-?[0-9]+                {yylval->node = solid_const_integer_node(atoi(yytext)); int temp = f(TINTEGER, yyscanner); if (temp) return temp;}
+-?[0-9]+\.[0-9]+        {yylval->node = solid_const_double_node(atof(yytext)); int temp = f(TDOUBLE, yyscanner); if (temp) return temp;}
 .                       {log_err("Unknown token %s", yytext); yyterminate();}
 
 %%
