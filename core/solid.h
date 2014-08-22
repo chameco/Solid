@@ -22,4 +22,8 @@ int yyparse(solid_ast_node **expression, yyscan_t scanner);
 solid_ast_node *solid_parse_expr(char *expr);
 
 solid_ast_node *solid_parse_file(char *path);
+
+void solid_compile(solid_vm *vm);
+
+void solid_import(solid_vm *vm);
 #endif
