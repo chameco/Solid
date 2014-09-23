@@ -286,9 +286,9 @@ void solid_lt(solid_vm *vm)
 		exit(1);
 	}
 	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
-		vm->regs[255] = solid_double(vm, solid_get_double_value(a) < solid_get_double_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_double_value(a) < solid_get_double_value(b));
 	} else {
-		vm->regs[255] = solid_int(vm, solid_get_int_value(a) < solid_get_int_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_int_value(a) < solid_get_int_value(b));
 	}
 }
 
@@ -301,9 +301,9 @@ void solid_lte(solid_vm *vm)
 		exit(1);
 	}
 	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
-		vm->regs[255] = solid_double(vm, solid_get_double_value(a) <= solid_get_double_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_double_value(a) <= solid_get_double_value(b));
 	} else {
-		vm->regs[255] = solid_int(vm, solid_get_int_value(a) <= solid_get_int_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_int_value(a) <= solid_get_int_value(b));
 	}
 }
 
@@ -316,9 +316,9 @@ void solid_gt(solid_vm *vm)
 		exit(1);
 	}
 	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
-		vm->regs[255] = solid_double(vm, solid_get_double_value(a) > solid_get_double_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_double_value(a) > solid_get_double_value(b));
 	} else {
-		vm->regs[255] = solid_int(vm, solid_get_int_value(a) > solid_get_int_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_int_value(a) > solid_get_int_value(b));
 	}
 }
 
@@ -331,9 +331,9 @@ void solid_gte(solid_vm *vm)
 		exit(1);
 	}
 	if (a->type == T_DOUBLE || b->type == T_DOUBLE) {
-		vm->regs[255] = solid_double(vm, solid_get_double_value(a) >= solid_get_double_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_double_value(a) >= solid_get_double_value(b));
 	} else {
-		vm->regs[255] = solid_int(vm, solid_get_int_value(a) >= solid_get_int_value(b));
+		vm->regs[255] = solid_bool(vm, solid_get_int_value(a) >= solid_get_int_value(b));
 	}
 }
 

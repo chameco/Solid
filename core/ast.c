@@ -127,7 +127,7 @@ int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 			temp[1] = i;
 			dbc(OP_NOP, 0, 0, NULL);
 			pn(node->arg2);
-			dbc(OP_JMP, temp[0] - 1, 0, NULL);
+			dbc(OP_JMP, temp[0], 0, NULL);
 			bcode[temp[1]] = solid_bc(OP_JMPIF, i, 2, NULL);
 			break;
 		case FN:

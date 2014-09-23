@@ -16,8 +16,8 @@
 %token <node> TIDENTIFIER TINLINE_IDENTIFIER TSTRING TINTEGER TDOUBLE
 %token <token> TTRUE TFALSE
 
-%token <token> TSEMICOLON TNEWLINE;
-%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT
+%token <token> TSEMICOLON;
+%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT TTILDE
 
 %token <token> TIF TWHILE TEQUALS TFN TNS TRETURN
 
@@ -69,6 +69,7 @@ identifier : TIDENTIFIER | TINLINE_IDENTIFIER {$$ = $1;}
 	   ;
 
 param_list : /* blank */ {$$ = solid_make_node(PARAM_LIST, NULL, NULL, solid_null_value());}
+	   | TTILDE {$$ = solid_make_node(PARAM_LIST, NULL, NULL, solid_null_value());}
 	   | TIDENTIFIER {$$ = solid_make_node(PARAM_LIST, $1, NULL, solid_null_value());}
 	   | param_list TCOMMA TIDENTIFIER {$$ = solid_make_node(PARAM_LIST, $3, $1, solid_null_value());}
 	   ;
