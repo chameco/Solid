@@ -36,7 +36,6 @@ solid_vm *solid_make_vm()
 
 void solid_push_stack(solid_vm *vm, solid_object *o)
 {
-	//debug("pushed a %d", o->type);
 	insert_list(vm->stack, (void *) o);
 }
 
@@ -50,7 +49,6 @@ solid_object *solid_pop_stack(solid_vm *vm)
 		n->prev->next = n->next;
 		n->next->prev = n->prev;
 		solid_object *ret = (solid_object *) n->data;
-		//debug("popped a %d", ret->type);
 		return ret;
 	}
 }
