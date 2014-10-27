@@ -49,52 +49,52 @@ Looping: `while 1 == 1 print("solid is still the best")`.
 
 Blocks: Anywhere you can have a single expression, you can have a block. Blocks start with either `do` or `{`, and end with `end` or `}`. There are no formal rules about which to use, but I've taken to using `do` and `end` on multi-line blocks, and curlies for one-liners. Examples:
 
-    c = 0
+    c = 0;
     while c < 10 do
-    	print(c)
-    	c = c + 1
-    end
+    	print(c);
+    	c = c + 1;
+    end;
 
-    c = 0
-    while c < 10 {print(c); c = c + 1;}
-
-Oh, and semicolons are automatically inserted by the lexer in the same manner as Go. Just follow Python logic about them and you'll be fine.
+    c = 0;
+    while c < 10 {print(c); c = c + 1;};
 
 Functions: You can get an anonymous function like so: `fn a a * a`. But wait, how am I supposed to call it? Solid is designed so there is only one core language element that has an intrinsic side effect: assignment. Obviously we've been using `print`, but that's not in the language core, rather it's a function written in C that works just like a normal function. More on that later, but now, let's define a longer function.
 
     f = fn a do
-    	print(a)
-    	a * a
+    	print(a);
+    	a * a;
     end
     
-    print(f(10))
+    print(f(10));
+
+There is some special syntax for thunks (functions taking no arguments) to remove parsing ambiguity. Simply replace the argument list with a tilde (`~`) to build a thunk.
 
 Additionally, functions are all full closures. The classic example:
 
-    make_counter = fn do
-        counter = 0
-        return fn do
-            counter = counter + 1
-        end
-    end
+    make_counter = fn ~ do
+        counter = 0;
+        return fn ~ do
+            counter = counter + 1;
+        end;
+    end;
     
-    c1 = make_counter()
-    c2 = make_counter()
-    print(c1())
-    print(c2())
-    print(c1())
-    print(c2())
+    c1 = make_counter();
+    c2 = make_counter();
+    print(c1());
+    print(c2());
+    print(c1());
+    print(c2());
 
 Recursion: Since all functions are nameless, and the only method of assignment is `<identifier> = <expression>`, recursion is possible through a `this` variable saved inside the function's closure. You'll see in the next example.
 
 Inline functions: If a function only includes symbols in its name, you can call it inline. To derive from the previous example, consider the following.
 
     ^ = fn a, b do
-        if b == 0 return 1
-        a * this(a, b - 1)
-    end
+        if b == 0 return 1;
+        a * this(a, b - 1);
+    end;
     
-    print(10 ^ 2)
+    print(10 ^ 2);
 
 Notice the recursion via use of `this`.
 
@@ -102,28 +102,30 @@ Namespaces: A namespace is pretty much a hash table or object.
 
     Math = ns do
         ^ = fn a, b do
-            if b == 0 return 1
-            a * a ^ b - 1
-        end
-    end
+            if b == 0 return 1;
+            a * a ^ b - 1;
+        end;
+    end;
     
-    print(Math.^(10, 2))
+    print(Math.^(10, 2));
     ^ = Math.^;
-    print(10 ^ 2)
+    print(10 ^ 2);
 
 A complete object system based on cloning namespaces is in the works, but right now feel free to call `clone` with a namespace argument to both derive classes and make instances. Don't worry about the overhead of having copies of functions in instances, as functions are represented as pointers internally.
 
 Lists: Make linked lists with the following syntax: `x = ["a", "b", "c", 1, 2, 3]`. Index them like so: `x !! 1`, which would evaluate to `"b"`. Lists are immutable, but you can add items with the cons operator, `:`. Another example:
 
-    x = [2, 3, 4]
-    print(x !! 0)
-    y = 1 : x
-    print(y !! 0)
+    x = [2, 3, 4];
+    print(x !! 0);
+    y = 1 : x;
+    print(y !! 0);
 
 Dynamic Evaluation:
  * `import` is a pretty important standard library function. Call `import("filename")` to load a file. Calling `import` on a file with a `.sol` extension will just execute whatever solid code is in that file in the current namespace, returning the result. However, calling it on a shared library (`.so`, not `.so.1`) will invoke the foreign function interface. More on that in the next section.
 
-And for now, that's pretty much it. My next milestones are pattern matching and garbage collection, but feel free to suggest things you'd like to see in the language by raising GitHub issues.
+Garbage Collection: It exists in a fairly primitive form. Run either `gc()` in solid or `solid_gc()` in C to run a very basic mark-and-sweep garbage collector. It might break things, or it might not. Tread carefully.
+
+And for now, that's pretty much it. My next milestone is pattern matching, but feel free to suggest things you'd like to see in the language by raising GitHub issues.
 
 Foreign Function Interface and API
 -----------------------------------
@@ -163,7 +165,7 @@ But wait, what if you want to use C from inside solid, rather than solid from in
 
 Contributing
 -------------
-Documentation is currently nonexistent, but the code is pretty standard object-oriented C99 (generally one main struct per file, "methods" are functions that take a struct pointer as the first argument, everything is allocated with `malloc`). Start in ast.c and vm.c.
+Documentation is currently nonexistent outside of this file, but the code is pretty standard object-oriented C99 (generally one main struct per file, "methods" are functions that take a struct pointer as the first argument, everything is allocated with `malloc`). Start in ast.c and vm.c.
 
 License
 --------
