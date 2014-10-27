@@ -1,3 +1,3 @@
 Fn = ns {
-	import("lib/_fn.so")
-}
+	import("lib/_fn.so");
+};
