@@ -19,7 +19,7 @@
 %token <token> TSEMICOLON;
 %token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT TTILDE
 
-%token <token> TIF TWHILE TEQUALS TFN TNS TRETURN
+%token <token> TIF TWHILE TEQUALS TGLOBAL TFN TNS TRETURN
 
 %type <node> program
 
@@ -49,6 +49,7 @@ expr : constant {$$ = $1;}
      | expr TLPAREN func_args TRPAREN {$$ = solid_make_node(CALL, $1, $3, solid_null_value());}
      | ns_var {$$ = solid_make_node(GET, $1, NULL, solid_null_value());}
      | ns_var TEQUALS expr {$$ = solid_make_node(SET, $3, $1, solid_null_value());}
+     | identifier TGLOBAL expr {$$ = solid_make_node(GSET, $3, $1, solid_null_value());}
      | TLBRACE stmt_list TRBRACE {$$ = solid_make_node(BLOCK, $2, NULL, solid_null_value());}
      | TIF expr expr {$$ = solid_make_node(IF, $2, $3, solid_null_value());}
      | TWHILE expr expr {$$ = solid_make_node(WHILE, $2, $3, solid_null_value());}

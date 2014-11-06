@@ -8,6 +8,7 @@ typedef enum solid_node_ins {
 	NS_VAR,
 	GET,
 	SET,
+	GSET,
 	CALL,
 	FUNC_ARGS,
 	CONST_INT,
