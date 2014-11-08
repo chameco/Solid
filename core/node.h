@@ -6,6 +6,7 @@ typedef enum solid_node_ins {
 	BLOCK,
 	IDENTIFIER,
 	NS_VAR,
+	GGET,
 	GET,
 	SET,
 	GSET,

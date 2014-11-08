@@ -58,6 +58,12 @@ int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 			dbc(OP_GET, 2, 1, NULL);
 			dbc(OP_MOV, 255, 2, NULL);
 			break;
+		case GGET:
+			dbc(OP_GLOBALNS, 1, 0, NULL);
+			dbc(OP_STORESTR, 2, 0, node->arg1->val.strval);
+			dbc(OP_GET, 2, 1, NULL);
+			dbc(OP_MOV, 255, 2, NULL);
+			break;
 		case SET:
 			pn(node->arg1);
 			dbc(OP_PUSH, 255, 0, NULL);

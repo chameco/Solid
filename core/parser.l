@@ -34,6 +34,7 @@ int f(int token, yyscan_t scanner);
 "false"                 {return TFALSE;}
 "="                     {return TEQUALS;}
 ":="                    {return TGLOBAL;}
+"@"                     {return TAT;}
 "("                     {return TLPAREN;}
 ")"                     {return TRPAREN;}
 "["                     {return TLSQUARE;}

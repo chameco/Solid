@@ -49,6 +49,7 @@ solid_object *solid_pop_stack(solid_vm *vm)
 		n->prev->next = n->next;
 		n->next->prev = n->prev;
 		solid_object *ret = (solid_object *) n->data;
+		free(n);
 		return ret;
 	}
 }

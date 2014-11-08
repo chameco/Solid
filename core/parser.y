@@ -17,7 +17,7 @@
 %token <token> TTRUE TFALSE
 
 %token <token> TSEMICOLON;
-%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TCOMMA TDOT TTILDE
+%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TAT TCOMMA TDOT TTILDE
 
 %token <token> TIF TWHILE TEQUALS TGLOBAL TFN TNS TRETURN
 
@@ -43,6 +43,7 @@ ns_var : identifier {$$ = solid_make_node(NS_VAR, $1, NULL, solid_null_value());
 
 
 expr : constant {$$ = $1;}
+     | TAT identifier {$$ = solid_make_node(GGET, $2, NULL, solid_null_value());}
      | expr TINLINE_IDENTIFIER expr {$$ = solid_make_node(CALL,
      solid_make_node(GET, solid_make_node(NS_VAR, $2, NULL, solid_null_value()), NULL, solid_null_value()),
      solid_make_node(FUNC_ARGS, $3, solid_make_node(FUNC_ARGS, $1, NULL, solid_null_value()), solid_null_value()), solid_null_value());}
