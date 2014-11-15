@@ -44,9 +44,9 @@ solid_object *solid_cfunc(solid_vm *vm);
 solid_object *solid_node(solid_vm *vm);
 solid_object *solid_struct(solid_vm *vm, void *val);
 
-void solid_mark_object(solid_object *o);
-void solid_mark_list(list_node *l);
-void solid_mark_hash(hash_map *l);
+void solid_mark_object(solid_object *o, unsigned char m);
+void solid_mark_list(list_node *l, unsigned char m);
+void solid_mark_hash(hash_map *l, unsigned char m);
 
 void solid_delete_object(solid_vm *vm, solid_object *o);
 void solid_delete_list(solid_vm *vm, list_node *l);

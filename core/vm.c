@@ -107,7 +107,7 @@ void solid_gc_add_object(solid_vm *vm, solid_object *o)
 void solid_gc(solid_vm *vm)
 {
 	for (int i = vm->namespace_stack_pointer; i >= 0; i--) {
-		solid_mark_object(vm->namespace_stack[i]);
+		solid_mark_object(vm->namespace_stack[i], 1);
 	}
 
 	list_node *c;
@@ -122,6 +122,8 @@ void solid_gc(solid_vm *vm)
 				c->next->prev = c->prev;
 				free(c);
 				c = prev;
+			} else if (cur->marked == 1) {
+				cur->marked = 0;
 			}
 		}
 	}

@@ -154,21 +154,24 @@ solid_object *solid_struct(solid_vm *vm, void *val)
 	return ret;
 }
 
-void solid_mark_object(solid_object *o)
+void solid_mark_object(solid_object *o, unsigned char m)
 {
 	if (o != NULL) {
-		if (o->marked == 1) {
+		if (o->marked != 0) {
 			return;
 		}
 
-		o->marked = 1;
+		o->marked = m;
 
 		switch (o->type) {
 			case T_INSTANCE:
-				solid_mark_hash((hash_map *) o->data);
+				solid_mark_hash((hash_map *) o->data, m);
 				break;
 			case T_LIST:
-				solid_mark_list((list_node *) o->data);
+				solid_mark_list((list_node *) o->data, m);
+				break;
+			case T_FUNC:
+				solid_mark_object(((solid_function *) o->data)->closure, m);
 				break;
 			default:
 				break;
@@ -176,19 +179,19 @@ void solid_mark_object(solid_object *o)
 	}
 }
 
-void solid_mark_list(list_node *l)
+void solid_mark_list(list_node *l, unsigned char m)
 {
 	if (l != NULL) {
 		list_node *c;
 		for (c = l->next; c != NULL; c = c->next) {
 			if (c->data != NULL) {
-				solid_mark_object((solid_object *) c->data);
+				solid_mark_object((solid_object *) c->data, m);
 			}
 		}
 	}
 }
 
-void solid_mark_hash(hash_map *h)
+void solid_mark_hash(hash_map *h, unsigned char m)
 {
 	int c = 0;
 	list_node *l;
@@ -200,7 +203,7 @@ void solid_mark_hash(hash_map *h)
 			for (cur = l->next; cur != NULL; cur = cur->next) {
 				if (cur->data != NULL) {
 					hv = (hash_val *) cur->data;
-					solid_mark_object((solid_object *) hv->val);
+					solid_mark_object((solid_object *) hv->val, m);
 				}
 			}
 		}
@@ -211,12 +214,15 @@ void solid_delete_object(solid_vm *vm, solid_object *o)
 {
 	switch (o->type) {
 		case T_NULL:
+			break;
 		case T_CFUNC:
+			return;
 		case T_NODE:
+			break;
 		case T_STRUCT:
 			break;
 		case T_INSTANCE:
-			solid_delete_hash(vm, (hash_map *) o->data);
+			//solid_delete_hash(vm, (hash_map *) o->data);
 			break;
 		case T_LIST:
 			solid_delete_list(vm, (list_node *) o->data);
@@ -225,11 +231,12 @@ void solid_delete_object(solid_vm *vm, solid_object *o)
 		case T_DOUBLE:
 		case T_STR:
 		case T_BOOL:
-		case T_FUNC:
 			free(o->data);
 			break;
+		case T_FUNC:
+			return;
 	}
-	free(o);
+	//free(o);
 }
 
 void solid_delete_list(solid_vm *vm, list_node *l)
