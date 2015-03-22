@@ -56,7 +56,7 @@ solid_object *solid_pop_stack(solid_vm *vm)
 
 void solid_push_list(solid_object *list, solid_object *o)
 {
-	insert_list((list_node *) list->data, (void *) o);
+	insert_list(list->data.list, (void *) o);
 }
 
 solid_object *solid_pop_list(solid_object *list)
@@ -136,7 +136,7 @@ solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid
 	solid_function *fval = (solid_function *) malloc(sizeof(solid_function));
 	fval->bcode = inslist;
 	fval->closure = closure;
-	ret->data = (void *) fval;
+	ret->data.func = fval;
 	if (fval->closure != NULL) {
 		solid_set_namespace(fval->closure, solid_str(vm, "this"), ret);
 	}
@@ -146,7 +146,7 @@ solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid
 solid_object *solid_define_c_function(solid_vm *vm, void (*function)(solid_vm *vm))
 {
 	solid_object *ret = solid_cfunc(vm);
-	ret->data = (void *) function;
+	ret->data.cfunc = function;
 	return ret;
 }
 
@@ -155,7 +155,7 @@ void solid_nth_list(solid_vm *vm)
 	solid_object *index = solid_pop_stack(vm);
 	int i = solid_get_int_value(index);
 	solid_object *list = solid_pop_stack(vm);
-	list_node *l = (list_node *) list->data;
+	list_node *l = list->data.list;
 	int counter = 0;
 	list_node *c;
 	for (c = l->next; c->next != NULL; c = c->next) {
@@ -202,8 +202,8 @@ void solid_cons(solid_vm *vm)
 	solid_object *elem = solid_pop_stack(vm);
 	list_node *ret = make_list();
 	insert_list(ret, (void *) elem);
-	ret->next->next = (list_node *) list->data;
-	((list_node *) list->data)->prev = ret->next;
+	ret->next->next = list->data.list;
+	list->data.list->prev = ret->next;
 	vm->regs[255] = solid_list(vm, ret);
 }
 
@@ -360,10 +360,10 @@ solid_bytecode solid_bc(solid_ins i, int a, int b, void *meta)
 void solid_call_func(solid_vm *vm, solid_object *func)
 {
 	if (func->type == T_FUNC) {
-		if (((solid_function *) func->data)->closure != NULL) {
-			solid_push_predefined_namespace(vm, ((solid_function *) func->data)->closure);
+		if (((solid_function *) func->data.func)->closure != NULL) {
+			solid_push_predefined_namespace(vm, ((solid_function *) func->data.func)->closure);
 		}
-		solid_bytecode *inslist = ((solid_function *) func->data)->bcode;
+		solid_bytecode *inslist = ((solid_function *) func->data.func)->bcode;
 		solid_bytecode cur;
 		int pos;
 		for (pos = 0, cur = inslist[pos]; cur.ins != OP_END; cur = inslist[++pos]) {
@@ -442,11 +442,11 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 			}
 		}
-		if (((solid_function *) func->data)->closure != NULL) {
+		if (((solid_function *) func->data.func)->closure != NULL) {
 			solid_pop_predefined_namespace(vm);
 		}
 	} else if (func->type == T_CFUNC) {
-		((void (*)(solid_vm *))(func->data))(vm);
+		((void (*)(solid_vm *))(func->data.func))(vm);
 	} else {
 		debug("func->type: %d", func->type);
 		log_err("Object not a function");

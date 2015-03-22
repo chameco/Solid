@@ -1,0 +1,25 @@
+EXEC = solid.exe
+CC = x86_64-w64-mingw32-gcc
+OBJECTS = core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
+CFLAGS = -DWINDOWS -std=c99 -I/usr/local/include -I. -Icore -Wall -g -fPIC
+
+all: $(EXEC)
+	
+$(EXEC): deps parser.o lexer.o $(OBJECTS)
+	$(CC) parser.o lexer.o $(OBJECTS) -L. -lcuttle -g -Wall -Werror -o $(EXEC)
+	
+parser.o: core/parser.y
+	bison -d core/parser.y
+	$(CC) $(CFLAGS) -Wno-implicit-function-declaration -c parser.c -o parser.o -g
+
+lexer.o: core/parser.l
+	flex core/parser.l
+	$(CC) $(CFLAGS) -Wno-unneeded-internal-declaration -Wno-implicit-function-declaration -c lexer.c -o lexer.o -g
+
+shared: parser.o lexer.o $(OBJECTS)
+	$(CC) -shared -Wl,-soname,libsolid.dll -o libsolid.dll -Llib_mingw -lcuttle parser.o lexer.o $(OBJECTS)
+
+clean:
+	rm -f parser.c parser.h lexer.c lexer.h
+	rm -f parser.o lexer.o $(OBJECTS)
+	rm -f lib/*.o

@@ -1,5 +1,7 @@
 #include "solid.h"
+#ifndef WINDOWS
 #include "linenoise/linenoise.h"
+#endif
 
 int yyparse(solid_ast_node **expression, yyscan_t scanner);
 
@@ -51,6 +53,7 @@ void solid_import(solid_vm *vm)
 		solid_object *func = solid_parse_tree(vm, solid_parse_file(input));
 		solid_call_func(vm, func);
 	} else if (strcmp(extension, "so") == 0) {
+#ifndef WINDOWS
 		char buffer[256];
 		getcwd(buffer, 256);
 		strcat(buffer, "/");
@@ -65,9 +68,11 @@ void solid_import(solid_vm *vm)
 		*(void **) (&init) = dlsym(handle, "solid_init");
 		init(vm);
 		//dlclose(handle);
+#endif
 	}
 }
 
+#ifndef WINDOWS
 void solid_repl()
 {
 	char *input;
@@ -90,6 +95,7 @@ void solid_repl()
 		//free(input);
 	}
 }
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -108,9 +114,12 @@ int main(int argc, char *argv[])
 
 		/* [FIXME: Track down all the other 'allocs that need to be free'd] */
 		//free(vm);
-	} else {
+	}
+#ifndef WINDOWS
+	else {
 		solid_repl();
 	}
+#endif
 
 	return 0;
 }

@@ -5,7 +5,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef WINDOWS
 #include <dlfcn.h>
+#endif
 #include <unistd.h>
 #include <cuttle/utils.h>
 #include <cuttle/debug.h>
