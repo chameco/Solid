@@ -10,3 +10,4 @@ parser.h
 parser.c
 lexer.h
 lexer.c
+*.elc
