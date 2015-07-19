@@ -138,7 +138,7 @@ solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid
 	fval->closure = closure;
 	ret->data.func = fval;
 	if (fval->closure != NULL) {
-		solid_set_namespace(fval->closure, solid_str(vm, "this"), ret);
+		solid_set_namespace(fval->closure, solid_str(vm, "$"), ret);
 	}
 	return ret;
 }

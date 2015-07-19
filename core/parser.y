@@ -17,7 +17,7 @@
 %token <token> TTRUE TFALSE
 
 %token <token> TSEMICOLON;
-%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TAT TCOMMA TDOT TTILDE
+%token <token> TLPAREN TRPAREN TLSQUARE TRSQUARE TLBRACE TRBRACE TAT TDOLLAR TCOMMA TDOT TTILDE
 
 %token <token> TIF TWHILE TEQUALS TGLOBAL TFN TNS TRETURN
 
@@ -38,6 +38,7 @@ stmt_list : expr TSEMICOLON {$$ = solid_make_node(STATEMENT_LIST, $1, NULL, soli
 	  ;
 
 ns_var : identifier {$$ = solid_make_node(NS_VAR, $1, NULL, solid_null_value());}
+       | TDOLLAR {$$ = solid_make_node(NS_VAR, solid_identifier_node("$"), NULL, solid_null_value());}
        | expr TDOT identifier {$$ = solid_make_node(NS_VAR, $3, $1, solid_null_value());}
        ;
 

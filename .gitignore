@@ -10,3 +10,6 @@ parser.h
 parser.c
 lexer.h
 lexer.c
+*.exe
+lib_*
+*.dll

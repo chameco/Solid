@@ -14,7 +14,7 @@ includedir = $(PREFIX_DIR)/include
 all: $(EXEC)
 	
 $(EXEC): deps parser.o lexer.o $(OBJECTS)
-	$(CC) parser.o lexer.o $(OBJECTS) -lcuttle -ldl -g -Wall -Werror -o $(EXEC)
+	$(CC) -static parser.o lexer.o $(OBJECTS) -lcuttle -ldl -g -Wall -Werror -o $(EXEC)
 	
 parser.o: core/parser.y
 	bison -d core/parser.y
