@@ -82,25 +82,25 @@ Additionally, functions are all full closures. The classic example:
     print(c1());
     print(c2());
 
-Recursion: Since all functions are nameless, and the only method of assignment is `<identifier> = <expression>`, recursion is possible through a `this` variable saved inside the function's closure. You'll see in the next example.
+Recursion: Since all functions are nameless, and the only method of assignment is `<identifier> = <expression>`, recursion is possible through a `$` variable saved inside the function's closure. You'll see in the next example.
 
 Inline functions: If a function only includes symbols in its name, you can call it inline. To derive from the previous example, consider the following.
 
     ^ = fn a, b do
         if b == 0 return 1;
-        a * this(a, b - 1);
+        a * $(a, b - 1);
     end;
     
     print(10 ^ 2);
 
-Notice the recursion via use of `this`.
+Notice the recursion via use of `$`.
 
 Namespaces: A namespace is just a hash table.
 
     Math = ns do
         ^ = fn a, b do
             if b == 0 return 1;
-            a * this(a, b - 1);
+            a * $(a, b - 1);
         end;
     end;
     
