@@ -166,6 +166,10 @@ To put it all together, here's a complete example of embedding solid into a C pr
 
 But wait, what if you want to use C from inside solid, rather than solid from inside C? Well, you do (almost) the exact same thing. The `import` function is capable of loading shared libraries with the extension `.so`. When loaded, solid will call an arbitrary, user-defined function named `solid_init` with the signature `void solid_init(solid_vm *vm)` inside the library, passing it the current VM. From there, you can do everything that we did above, defining functions, modifying namespaces, etc. Don't want to go through the trouble to manually build a shared library? Solid has you covered. Just throw your C file `whatever.c` containing `solid_init` in the `lib` folder of the solid source tree, and run `make lib TARGET=whatever`, and it will create a shared library called `whatever.so` in the solid source root, which can now be freely imported.
 
+Extras
+------
+Programmers using [GNU Emacs](https://www.gnu.org/software/emacs/) can load [`solid-mode`](etc/solid-mode.el), providing basic syntax highlighting and formatting for Solid scripts.
+
 Contributing
 -------------
 Documentation is currently nonexistent outside of this file, but the code is pretty standard object-oriented C99 (generally one main struct per file, "methods" are functions that take a struct pointer as the first argument, everything is allocated with `malloc`). Start in ast.c and vm.c.
