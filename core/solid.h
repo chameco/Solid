@@ -9,9 +9,8 @@
 #include <dlfcn.h>
 #endif
 #include <unistd.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
 
+#include "utils.h"
 #include "scanner_state.h"
 #include "node.h"
 #include "vm.h"

@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <cuttle/debug.h>
+
+#include "utils.h"
 
 void solid_set_namespace(solid_object *ns, solid_object *name, solid_object *o)
 {
@@ -65,7 +66,7 @@ solid_object *solid_instance(solid_vm *vm)
 {
 	solid_object *ret = solid_make_object(vm);
 	ret->type = T_INSTANCE;
-	ret->data_size = sizeof(hash_map);
+	ret->data_size = sizeof(hash_map *);
 	ret->data.instance = make_hash_map();
 	return ret;
 }
@@ -112,7 +113,7 @@ solid_object *solid_list(solid_vm *vm, list_node *l)
 {
 	solid_object *ret = solid_make_object(vm);
 	ret->type = T_LIST;
-	ret->data_size = sizeof(list_node);
+	ret->data_size = sizeof(list_node *);
 	ret->data.list = l;
 	return ret;
 }
@@ -155,9 +156,6 @@ void solid_mark_object(solid_object *o, unsigned char m)
 				break;
 			case T_LIST:
 				solid_mark_list(o->data.list, m);
-				break;
-			case T_FUNC:
-				solid_mark_object(((solid_function *) o->data.func)->closure, m);
 				break;
 			default:
 				break;
@@ -259,16 +257,71 @@ void solid_delete_hash(solid_vm *vm, hash_map *h)
 
 solid_object *solid_clone_object(solid_vm *vm, solid_object *class)
 {
-	if (class->type != T_INSTANCE) {
-		log_err("Attempt to clone non-namespace object");
-		exit(1);
-	} else {
-		solid_object *ret = solid_make_object(vm);
-		ret->type = T_INSTANCE;
-		ret->data.instance = copy_hash(class->data.instance);
-		return ret;
+	solid_object *ret;
+	switch (class->type) {
+		case T_INSTANCE:
+			ret = solid_make_object(vm);
+			ret->type = T_INSTANCE;
+			ret->data_size = sizeof(hash_map *);
+			ret->data.instance = solid_clone_hash(vm, class->data.instance);
+			break;
+		case T_LIST:
+			ret = solid_list(vm, solid_clone_list(vm, class->data.list));
+			break;
+		case T_FUNC:
+		case T_CFUNC:
+			ret = class;
+			break;
+		default:
+			ret = solid_make_object(vm);
+			ret->type = class->type;
+			ret->marked = class->marked;
+			ret->data_size = class->data_size;
+			ret->data = class->data;
+			break;
 	}
+	return ret;
 }
+
+list_node *solid_clone_list(solid_vm *vm, list_node *l)
+{
+	list_node *ret = make_list();
+	if (l != NULL) {
+		list_node *c;
+		for (c = l->next; c != NULL; c = c->next) {
+			if (c->data != NULL) {
+				insert_list(ret, solid_clone_object(vm, (solid_object *) c->data));
+			}
+		}
+	}
+	return ret;
+}
+
+hash_map *solid_clone_hash(solid_vm *vm, hash_map *h)
+{
+	int c = 0;
+	hash_map *ret = make_hash_map();
+	list_node *l;
+	for (c = 0; c < 256; ++c) {
+		l = h->buckets[c];
+		if (l != NULL) {
+			ret->buckets[c] = make_list();
+			if (l != NULL) {
+				list_node *cur;
+				for (cur = l->next; cur != NULL; cur = cur->next) {
+					if (cur->data != NULL) {
+						hash_val *hv = (hash_val *) malloc(sizeof(hash_val));
+						strncpy(hv->key, ((hash_val *) cur->data)->key, 256);
+						hv->val = solid_clone_object(vm, (solid_object *) ((hash_val *) cur->data)->val);
+						insert_list(ret->buckets[c], hv);
+					}
+				}
+			}
+		}
+	}
+	return ret;
+}
+
 
 int solid_get_int_value(solid_object *o)
 {

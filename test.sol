@@ -1,6 +1,6 @@
-^ = fn a, b do
-	if b == 0 return 1;
-	a * $(a, b - 1);
-end;
+fib_recursive = fn n {
+	if <(n, 2) return n;
+	return $(n - 1) + $(n - 2);
+};
 
-print(10 ^ 2);
+print(fib_recursive(20));

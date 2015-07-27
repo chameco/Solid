@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
+
+#include "utils.h"
 
 solid_node_val NULL_VALUE = {0};
 

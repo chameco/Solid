@@ -3,8 +3,8 @@
 
 typedef struct solid_vm solid_vm;
 
+#include "utils.h"
 #include "object.h"
-#include <cuttle/utils.h>
 
 typedef enum solid_ins {
 	OP_END,
@@ -41,7 +41,7 @@ typedef struct solid_bytecode {
 
 typedef struct solid_function {
 	solid_bytecode *bcode;
-	solid_object *closure;
+	//solid_object *closure;
 } solid_function;
 
 struct solid_vm {
@@ -71,7 +71,7 @@ solid_object *solid_get_current_namespace(solid_vm *vm);
 void solid_gc_add_object(solid_vm *vm, solid_object *o);
 void solid_gc(solid_vm *vm);
 
-solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid_object *closure);
+solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist);
 solid_object *solid_define_c_function(solid_vm *vm, void (*function)(solid_vm *vm));
 
 void solid_nth_list(solid_vm *vm);

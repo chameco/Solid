@@ -1,5 +1,5 @@
 EXEC = solid
-OBJECTS = core/linenoise/linenoise.o core/solid.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
+OBJECTS = core/linenoise/linenoise.o core/solid.o core/utils.o core/node.o core/vm.o core/object.o core/ast.o core/common.o
 CFLAGS = -std=c99 -I/usr/local/include -I. -Icore -Wall -g -fPIC
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
@@ -14,7 +14,7 @@ includedir = $(PREFIX_DIR)/include
 all: $(EXEC)
 	
 $(EXEC): deps parser.o lexer.o $(OBJECTS)
-	$(CC) -static parser.o lexer.o $(OBJECTS) -lcuttle -ldl -g -Wall -Werror -o $(EXEC)
+	$(CC) parser.o lexer.o $(OBJECTS) -ldl -g -Wall -Werror -o $(EXEC)
 	
 parser.o: core/parser.y
 	bison -d core/parser.y

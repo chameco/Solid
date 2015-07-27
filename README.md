@@ -66,22 +66,6 @@ Functions: You can get an anonymous function like so: `fn a a * a`. Solid is des
 
 There is some special syntax for thunks to remove parsing ambiguity. Simply replace the argument list with a tilde (`~`) to build a thunk.
 
-Additionally, functions are all full closures. The classic example:
-
-    make_counter = fn ~ do
-        counter = 0;
-        return fn ~ do
-            counter = counter + 1;
-        end;
-    end;
-    
-    c1 = make_counter();
-    c2 = make_counter();
-    print(c1());
-    print(c2());
-    print(c1());
-    print(c2());
-
 Recursion: Since all functions are nameless, and the only method of assignment is `<identifier> = <expression>`, recursion is possible through a `$` variable saved inside the function's closure. You'll see in the next example.
 
 Inline functions: If a function only includes symbols in its name, you can call it inline. To derive from the previous example, consider the following.

@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
 
+#include "utils.h"
 #include "object.h"
 
 solid_vm *solid_make_vm()
@@ -75,22 +74,38 @@ solid_object *solid_pop_list(solid_object *list)
 
 void solid_push_namespace(solid_vm *vm)
 {
+	if (vm->namespace_stack_pointer >= 255) {
+		log_err("Namespace stack overflow");
+		exit(1);
+	}
 	vm->namespace_stack[vm->namespace_stack_pointer+1] = solid_clone_object(vm, vm->namespace_stack[vm->namespace_stack_pointer]);
 	vm->namespace_stack_pointer++;
 }
 
 void solid_pop_namespace(solid_vm *vm)
 {
-	//free(vm->namespace_stack[vm->namespace_stack_pointer--]);
+	if (vm->namespace_stack_pointer == 0) {
+		log_err("Namespace stack underflow");
+		exit(1);
+	}
+	solid_delete_object(vm, vm->namespace_stack[vm->namespace_stack_pointer--]);
 }
 
 void solid_push_predefined_namespace(solid_vm *vm, solid_object *namespace)
 {
+	if (vm->namespace_stack_pointer >= 255) {
+		log_err("Namespace stack overflow");
+		exit(1);
+	}
 	vm->namespace_stack[++vm->namespace_stack_pointer] = namespace;
 }
 
 solid_object *solid_pop_predefined_namespace(solid_vm *vm)
 {
+	if (vm->namespace_stack_pointer == 0) {
+		log_err("Namespace stack underflow");
+		exit(1);
+	}
 	return vm->namespace_stack[vm->namespace_stack_pointer--];
 }
 
@@ -130,16 +145,12 @@ void solid_gc(solid_vm *vm)
 	vm->regs[255] = solid_str(vm, "Trash compactor completing operation");
 }
 
-solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist, solid_object *closure)
+solid_object *solid_define_function(solid_vm *vm, solid_bytecode *inslist)
 {
 	solid_object *ret = solid_func(vm);
 	solid_function *fval = (solid_function *) malloc(sizeof(solid_function));
 	fval->bcode = inslist;
-	fval->closure = closure;
 	ret->data.func = fval;
-	if (fval->closure != NULL) {
-		solid_set_namespace(fval->closure, solid_str(vm, "$"), ret);
-	}
 	return ret;
 }
 
@@ -360,9 +371,8 @@ solid_bytecode solid_bc(solid_ins i, int a, int b, void *meta)
 void solid_call_func(solid_vm *vm, solid_object *func)
 {
 	if (func->type == T_FUNC) {
-		if (((solid_function *) func->data.func)->closure != NULL) {
-			solid_push_predefined_namespace(vm, ((solid_function *) func->data.func)->closure);
-		}
+		solid_push_namespace(vm);
+		solid_set_namespace(solid_get_current_namespace(vm), solid_str(vm, "$"), func);
 		solid_bytecode *inslist = ((solid_function *) func->data.func)->bcode;
 		solid_bytecode cur;
 		int pos;
@@ -417,7 +427,7 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					vm->regs[cur.a] = solid_get_current_namespace(vm);
 					break;
 				case OP_FN:
-					vm->regs[cur.a] = solid_define_function(vm, (solid_bytecode *) cur.meta, solid_clone_object(vm, solid_get_current_namespace(vm)));
+					vm->regs[cur.a] = solid_define_function(vm, (solid_bytecode *) cur.meta);
 					break;
 				case OP_NS:
 					vm->regs[cur.a] = solid_clone_object(vm, solid_get_current_namespace(vm));
@@ -427,11 +437,11 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					vm->regs[cur.a] = solid_pop_predefined_namespace(vm);
 					break;
 				case OP_JMP:
-					pos = cur.a;
+					pos = cur.a - 1;
 					break;
 				case OP_JMPIF:
 					if (solid_get_bool_value(vm->regs[cur.b])) {
-						pos = cur.a;
+						pos = cur.a - 1;
 					}
 					break;
 				case OP_CALL:
@@ -442,9 +452,7 @@ void solid_call_func(solid_vm *vm, solid_object *func)
 					break;
 			}
 		}
-		if (((solid_function *) func->data.func)->closure != NULL) {
-			solid_pop_predefined_namespace(vm);
-		}
+		solid_pop_namespace(vm);
 	} else if (func->type == T_CFUNC) {
 		((void (*)(solid_vm *))(func->data.func))(vm);
 	} else {

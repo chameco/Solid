@@ -3,10 +3,10 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
-#include <cuttle/utils.h>
 
 typedef struct solid_object solid_object;
 
+#include "utils.h"
 #include "vm.h"
 
 typedef enum solid_type {
@@ -36,7 +36,7 @@ typedef union solid_object_data {
 
 struct solid_object {
 	solid_type type;
-	unsigned char marked;
+	char marked;
 	size_t data_size;
 	solid_object_data data;
 };
@@ -62,7 +62,10 @@ void solid_mark_hash(hash_map *l, unsigned char m);
 void solid_delete_object(solid_vm *vm, solid_object *o);
 void solid_delete_list(solid_vm *vm, list_node *l);
 void solid_delete_hash(solid_vm *vm, hash_map *l);
+
 solid_object *solid_clone_object(solid_vm *vm, solid_object *class);
+list_node *solid_clone_list(solid_vm *vm, list_node *l);
+hash_map *solid_clone_hash(solid_vm *vm, hash_map *l);
 
 int solid_get_int_value(solid_object *o);
 double solid_get_double_value(solid_object *o);

@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <cuttle/utils.h>
-#include <cuttle/debug.h>
 
+#include "utils.h"
 #include "node.h"
 #include "vm.h"
 #include "object.h"
@@ -21,7 +20,7 @@ solid_object *solid_parse_tree(solid_vm *vm, solid_ast_node *tree)
 			sizeof(solid_bytecode) * 1024);
 	int i = solid_parse_node(tree, bcode, 0);
 	dbc(OP_END, 0, 0, NULL);
-	return solid_define_function(vm, bcode, NULL);
+	return solid_define_function(vm, bcode);
 }
 int solid_parse_node(solid_ast_node *node, solid_bytecode *bcode, int i)
 {
