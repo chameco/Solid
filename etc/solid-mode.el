@@ -53,7 +53,7 @@ This number adheres to Semantic Versioning (`http://semver.org/').")
   ;; Comment Syntax
   '("#")
   ;; Keywords
-  '("if" "while" "fn" "do" "end" "return" "this" "ns")
+  '("if" "while" "fn" "do" "end" "return" "$" "ns")
   ;; Operators and Other Syntax
   '(("=" . font-lock-operator)
     ("!!" . font-lock-operator)
