@@ -1,3 +1,18 @@
+PLEASE DON'T USE THIS IN PRODUCTION
+===================================
+
+I wrote this when I was 15.
+
+I'm leaving it here because I still think it's pretty neat.
+
+I'd do a lot of things differently today.
+
+I imagine it's riddled with security holes.
+
+If you need something similar, use [Lua](https://www.lua.org).
+
+If you need something more specialized, [contact me](https://chame.co) `;)`.
+
 solid - a minimalist language with a tiny VM
 ============================================
 
